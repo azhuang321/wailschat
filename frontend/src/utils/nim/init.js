@@ -1,12 +1,9 @@
+import config from '@/config/config';
 import { onConnect, onError, onWillReconnect, onDisConnect } from './callback';
 import { onMyInfo } from '@/utils/nim/user';
 
-await import('../../nim_sdk/NIM_Web_NIM_v9.2.0.js');
+await import(`../../nim_sdk/${config.sdk}.js`);
 let nim = null;
-
-// import * as nimtest from 'nim';
-// console.dir(nimtest);
-// console.dir(window.NIM);
 
 /**
  * 文档地址
@@ -18,7 +15,7 @@ export const getNimInstance = async () => {
         await new Promise((resolve, reject) => {
             nim = window.NIM.getInstance({
                 debug: false,
-                appKey: '45c6af3c98409b18a84451215d0bdd6e',
+                appKey: config.appkey,
                 account: 'azhuang',
                 token: '4297f44b13955235245b2497399d7a93',
                 transports: ['websocket'],
@@ -31,7 +28,7 @@ export const getNimInstance = async () => {
                 onmyinfo: onMyInfo,
                 onwillreconnect: onWillReconnect,
                 ondisconnect: onDisConnect,
-                onsyncdone: function onSyncDone() {
+                onsyncdone: function onSyncDone () {
                     // 说明在聊天列表页
                     console.dir('同步完成');
                     resolve();

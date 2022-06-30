@@ -1,22 +1,45 @@
-<script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue';
-import escapeHtml from 'escape-html'
-</script>
-
 <template>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Hello Vue 3 + Vite" />
-</template>
+    <div id="app">
+        <router-view v-if="showView"/>
+    </div>
 
-<style>
-#app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
-}
-</style>
+</template>
+<script>
+import dayjs from 'dayjs';
+import 'dayjs/plugin/advancedFormat.js';
+import 'dayjs/plugin/customParseFormat.js';
+import 'dayjs/plugin/duration';
+import 'dayjs/plugin/arraySupport';
+import 'dayjs/plugin/localeData.js';
+import 'dayjs/plugin/weekOfYear.js';
+import 'dayjs/plugin/isSameOrBefore.js';
+import 'dayjs/plugin/isSameOrAfter.js';
+import 'dayjs/plugin/dayOfYear.js';
+import 'dayjs/plugin/weekYear.js';
+import escapeHtml from 'escape-html';
+// import '';
+
+
+export default {
+    name: 'App',
+    data () {
+        return {
+            // 用于点击当前页的router时，刷新当前页
+            showView: true
+        };
+    },
+    mounted () {
+
+    },
+    methods: {
+        // 刷新当前路由方法
+        refreshView () {
+            this.showView = false;
+            this.$nextTick(() => (this.showView = true));
+        }
+    }
+};
+
+</script>
+<script setup>
+</script>

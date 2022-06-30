@@ -1,0 +1,15 @@
+/**
+ * 文档 ： https://vuex.vuejs.org/zh/guide/modules.html
+ */
+
+import { state } from './state';
+import { mutations } from './mutations';
+import { actions } from './actions';
+import { getters } from './getters';
+
+export default {
+    state,
+    getters,
+    actions,
+    mutations
+};

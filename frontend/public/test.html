@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+<body>
+<div id="root"></div>
+<!--<script>
+    // 基础组件
+    const app = Vue.createApp({
+        template: `
+            <button-counter></button-counter>
+            <button-counter></button-counter>
+            <button-counter></button-counter>
+        `
+    })
+
+    // 定义一个名为 button-counter 的新全局组件
+    app.component('button-counter', {
+        data() {
+            return {
+                count: 0
+            }
+        },
+        template: `
+    <button @click="count++">
+      You clicked me {{ count }} times.
+    </button>`
+    })
+
+    app.mount('#root')
+
+</script>-->
+
+<!--<script>
+    // 基础组件 传值
+    const app = Vue.createApp({
+        data(){
+            return {
+                posts: [
+                    { id: 1, title: 'My journey with Vue' },
+                    { id: 2, title: 'Blogging with Vue' },
+                    { id: 3, title: 'Why Vue is so fun' }
+                ]
+            }
+        },
+        template: `
+            <blog-post title="My journey with Vue"></blog-post>
+            <blog-post title="Blogging with Vue"></blog-post>
+            <blog-post title="Why Vue is so fun"></blog-post>
+
+             <blog-post
+                v-for="post in posts"
+                :key="post.id"
+                :title="post.title"
+            ></blog-post>
+        `
+    })
+
+    app.component('blog-post', {
+        props: ['title'],
+        template: `<h4>{{ title }}</h4>`
+    })
+
+    app.mount('#root')
+</script>-->
+
+<!--<script>
+    //父子组件传值 校验
+    const app = Vue.createApp({
+        data() {
+            return { num: 11111 }
+        },
+        template: `
+      <div><test :content="num" /></div>
+    `
+    });
+
+    // type:String, Boolean, Array, Object, Function, Symbol
+    // required 必填
+    // default 默认值
+    app.component('test', {
+        props: {
+            content: {
+                type: Number,
+                validator: function(value) {
+                    return value < 1000;
+                },
+                default: function() {
+                    return 456;
+                }
+            }
+        },
+        template: `<div>{{content}}</div>`
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+<script>
+    //子组件传递事件给父组件
+    const app = Vue.createApp({
+        data(){
+            return {
+                posts: [
+                    { id: 1, title: 'My journey with Vue' },
+                    { id: 2, title: 'Blogging with Vue' },
+                    { id: 3, title: 'Why Vue is so fun' }
+                ],
+                postFontSize: 1
+            }
+        },
+        methods:{
+            handChildEvent($param) {
+                alert($param)
+            }
+        },
+        template: `
+<!--            <h3>子组件直接抛出事件</h3>
+            <div :style="{ fontSize: postFontSize + 'em' }">
+                <blog-post
+                  v-for="post in posts"
+                  :key="post.id"
+                  :title="post.title"
+                  @enlarge-text="postFontSize += 0.1"
+                  @run-func="handChildEvent"
+                ></blog-post>
+            </div>-->
+
+            <h3>子组件直接抛出事件 无验证</h3>
+            <div :style="{ fontSize: postFontSize + 'em' }">
+                <blog-post1
+                  v-for="post in posts"
+                  :key="post.id"
+                  :title="post.title"
+                  @enlarge-text="postFontSize += 0.1"
+                  @run-func="handChildEvent"
+                ></blog-post1>
+            </div>
+
+<!--            <h3>子组件直接抛出事件 验证</h3>
+            <div :style="{ fontSize: postFontSize + 'em' }">
+                <blog-post2
+                  v-for="post in posts"
+                  :key="post.id"
+                  :title="post.title"
+                  @enlarge-text="postFontSize += $event"
+                  @run-func="handChildEvent"
+                ></blog-post2>
+            </div>-->
+`
+    })
+
+   /* //子组件直接抛出事件
+    app.component('blog-post', {
+        props: ['title'],
+        template: `
+    <div class="blog-post">
+      <h4>{{ title }}</h4>
+      <button @click="$emit('enlargeText'),$emit('runFunc')">
+        Enlarge text
+      </button>
+    </div>
+  `
+    })*/
+
+    //子组件列出抛出事件 无验证
+    app.component('blog-post1', {
+        props: ['title'],
+        emits:['enlargeText','runFunc'],
+        template: `
+    <div class="blog-post">
+      <h4>{{ title }}</h4>
+      <button @click="$emit('enlargeText'),$emit('runFunc')">
+        Enlarge text
+      </button>
+    </div>
+  `})
+
+   /* //子组件列出抛出事件 验证
+    app.component('blog-post2', {
+        props: ['title'],
+        emits: {
+            enlargeText($param){
+                alert($param)
+                // return true
+            }
+        },
+        methods:{
+            myFunc(){
+              this.$emit('enlargeText')
+          }
+        },
+        template: `
+    <div class="blog-post">
+      <h4>{{ title }}</h4>
+      <button @click="myFunc(),$emit('enlargeText',0.2),$emit('runFunc',0.3)">
+       <!--使用自定义方法调用 传递事件会阻止直接调用-->
+        Enlarge text
+      </button>
+      <button @click="myFunc">
+        test
+      </button>
+    </div>
+  `})*/
+
+    app.mount('#root')
+</script>
+
+<!--<script>
+    //子组件改变父组件值的 高级用法
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1 ,
+                count1: 1 ,
+                count2: 1
+            }
+        },
+        template: `
+            <counter v-model="count" />
+            <counter1 v-model:test="count" />
+            <counter2 v-model:count1="count1" v-model:count2="count2" />
+        `});
+
+    app.component('counter', {
+        props: ['modelValue'],
+        methods: {
+            handleClick() {
+                this.$emit('update:modelValue', this.modelValue + 3);
+            }
+        },
+        template: `
+      <button @click="handleClick">handleClick:{{modelValue}}</button>
+    `
+    });
+    app.component('counter1', {
+        props: ['test'],
+        methods: {
+            handleClick1() {
+                this.$emit('update:test', this.test + 3);
+            }
+        },
+        template: `
+      <button @click="handleClick1">handleClick1:{{test}}</button>
+    `
+    });
+
+    app.component('counter2', {
+        props: ['count1','count2'],
+        methods: {
+            handleClick() {
+                this.$emit('update:count1', this.count1 + 1);
+                this.$emit('update:count2', this.count2 + 3);
+            }
+        },
+        template: `
+      <button @click="handleClick">handleClick:{{count1}}-{{count2}}</button>
+    `
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+
+
+<!--<script>
+    //父子组件通讯,修饰词  高级
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 'a',
+            }
+        },
+        template: `
+             <counter v-model.uppercase="count" />
+        `});
+
+    app.component('counter', {
+        props: {
+            'modelValue': String,
+            'modelModifiers': {
+                default: ()=> ({})
+            }
+        },
+        methods: {
+            handleClick() {
+                let newValue = this.modelValue + 'b';
+                if(this.modelModifiers.uppercase) {
+                    newValue = newValue.toUpperCase();
+                }
+                this.$emit('update:modelValue', newValue);
+            },
+        },
+        template: `
+      <div @click="handleClick">{{modelValue}}</div>
+    `
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+
+
+
+
+<!--<script>
+    // Non-prop 属性
+    // v-bind="params"
+    // :content="params.content" :a="params.a" :b="params.b" :c="params.c"
+    const app = Vue.createApp({
+        data(){
+          return {
+              params:{
+                  content:'test',
+                  a:1,
+                  b:2,
+              }
+          }
+        },
+        template: `
+      <div>
+        <test v-bind="params"></test>
+      </div>
+    `
+    });
+
+    app.component('test', {
+       props:['content','a','b'],
+        template: `
+        <div>{{content}} - {{a}} - {{b}}</div>
+        `
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+<!--<script>
+    // 单向数据流的概念
+    // 属性传的时候，使用 content-abc 这种命名，接的时候，使用 contentAbc 命名
+    // 单项数据流的概念: 子组件可以使用父组件传递过来的数据，但是绝对不能修改传递过来的数据
+    const app = Vue.createApp({
+        data(){
+            return {
+                content:"abc",
+                num: 1
+            }
+        },
+        template: `
+      <div>
+        <test :content-abc="content"></test>
+      </div>
+      <counter :count="num" />
+        <counter :count="num" />
+        <counter :count="num" />
+    `
+    });
+
+    app.component('test', {
+        props:['contentAbc'],
+        template: `
+        <div>{{contentAbc}}</div>
+        `
+    });
+
+    app.component('counter', {
+        props: ['count'],
+        data(){
+            return {
+                myCount: this.count
+            }
+        },
+        template: `<div @click="myCount += 1">{{myCount}}</div>`
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+
+<!--<script>
+    // 作用域插槽
+    // slot 数据作用域的问题 父模板调用的数据都是父模板的数据，子模板调用的数据都是子模板的数据
+    const app = Vue.createApp({
+        data(){
+            return {
+                text:'button'
+            }
+        },
+        template: `
+          <myform>
+            <button>{{text}}-1</button>
+          </myform>
+
+          <myform>
+            <button>button2 </button>
+          </myform>
+
+          <myform>
+            <button3 />
+          </myform>
+    `
+    });
+
+    app.component('myform', {
+        methods:{
+            handleClick(){
+                alert(1)
+            }
+        },
+        template: `
+              <div>
+                <input />
+                <span @click="handleClick"><slot /></span>
+              </div>
+        `});
+    app.component('button3',{
+        template:`<button>button-3</button>`
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+
+<!--<script>
+    // slot 插槽
+    // slot 中使用的数据，作用域的问题
+    // 父模版里调用的数据属性，使用的都是父模版里的数据
+    // 子模版里调用的数据属性，使用的都是子模版里的数据
+    // 具名插槽
+    const app = Vue.createApp({
+        template: `
+      <layout>
+        <template v-slot:header>
+          <div>header</div>
+        </template>
+        <template #footer> &lt;!&ndash;简写&ndash;&gt;
+          <div>footer</div>
+        </template>
+      </layout>
+    `
+    });
+
+    app.component('layout', {
+        template: `
+      <div>
+        <slot>默认值:defalut</slot>
+        <slot name="header"></slot>
+        <div>content</div>
+        <slot name="footer"></slot>
+      </div>
+    `
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+<!--<script>
+    // 作用域插槽 高级用法  子组件渲染由父组件决定时使用
+    const app = Vue.createApp({
+        template: `
+      <list v-slot="{item}">
+        <div>{{item}}</div>
+      </list>
+    `});
+
+    app.component('list', {
+        data() {return {list: [1, 2, 3]}},
+        template: `
+      <div>
+        <slot v-for="item in list" :item="item" />
+      </div>
+    `
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+
+<!--<script>
+    // 动态组件: 根据数据的变化，结合 compoent 这个标签，来随时动态切换组件的现实
+    const app = Vue.createApp({
+        data(){
+          return {
+              currentItem:'input-item'
+          }
+        },
+        methods:{
+            handClick(){
+                if ( this.currentItem === 'input-item' ){
+                    this.currentItem = 'common-item'
+                }else {
+                    this.currentItem = 'input-item'
+                }
+            }
+        },
+        template: `
+      <div>
+        <keep-alive>
+            <component :is="currentItem" />
+        </keep-alive>
+         <br>
+        <button @click="handClick">change</button>
+      </div>
+    `});
+
+
+    app.component('common-item', {
+        template: `<div>hello world</div>`
+    });
+
+    app.component('input-item', {
+        template: `<input />`
+    });
+
+    app.component('async-common-item', Vue.defineAsyncComponent(() => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve({
+                    template: `<div>this is an async component</div>`
+                })
+            }, 4000)
+        })
+    }))
+
+    const vm = app.mount('#root');
+</script>-->
+
+
+<!--
+<script>
+    // 动态组件: 根据数据的变化，结合 compoent 这个标签，来随时动态切换组件的现实
+    // 异步组件: 是异步执行某些组件的逻辑，这叫做异步组件
+
+    const app = Vue.createApp({
+        template: `
+      <div>
+        <common-item />
+        <async-common-item />
+      </div>
+    `});
+
+
+    app.component('common-item', {
+        template: `<div>hello world</div>`
+    });
+
+    app.component('async-common-item', Vue.defineAsyncComponent(() => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve({
+                    template: `<div>this is an async component</div>`
+                })
+            }, 4000)
+        })
+    }))
+
+    const vm = app.mount('#root');
+</script>-->
+
+<!--<script>
+    // v-once 让某个元素标签只渲染一次
+    // ref 实际上是获取 Dom 节点 / 组件引用 的一个语法
+    // provide / inject 父组件 传值到 孙子节点
+    const app = Vue.createApp({
+        data() {
+            return { count: 1}
+        },
+        mounted(){
+          alert(this.$refs.count)
+        },
+        provide() {
+            return {
+                count: this.count,
+            }
+        },
+        template: `
+      <div>
+        <child :count="count" />
+        <button @click="count += 1">Add</button>
+        <div ref="count">
+            {{count}}
+        </div>
+      </div>
+    `
+    });
+
+    app.component('child', {
+        template: `<child-child />`
+    });
+
+    app.component('child-child', {
+        inject: ['count'],
+        template: `<div>{{count}}</div>`
+    });
+
+    const vm = app.mount('#root');
+</script>-->
+
+<!--vue3 组件与动画-->
+<!--https://v3.cn.vuejs.org/guide/transitions-overview.html-->
+<!--https://animate.style/-->
+
+
+</body>
+</html>
