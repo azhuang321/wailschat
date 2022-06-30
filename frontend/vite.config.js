@@ -117,7 +117,7 @@ export default defineConfig(({ mode }) => {
                 }
             },
             rollupOptions: {
-                external: ['nim'], //lmw add 6 不让cesium再被编译
+                external: ['nim', 'element-plus'], //lmw add 6 不让cesium再被编译
                 plugins: [
                     externalGlobals({
                         nim: 'NIM' //lmw add 7 用引入的Cesium对应代码中的cesium
@@ -134,21 +134,21 @@ export default defineConfig(({ mode }) => {
                 //     }
                 // }
             }
-        }
+        },
         // 开发服务器配置
-        // server: {
-        //     host: false,
-        //     open: false,
-        //     port: 3000
-        //     // proxy: {
-        //     //     '/api': {
-        //     //         target: '//www.xxxx.com',
-        //     //         changeOrigin: true,
-        //     //         ws: true,
-        //     //         secure: true,
-        //     //         rewrite: (path) => path.replace(/^\/api/, '')
-        //     //     }
-        //     // }
-        // }
+        server: {
+            host: false,
+            open: false,
+            port: 3000
+            // proxy: {
+            //     '/api': {
+            //         target: '//www.xxxx.com',
+            //         changeOrigin: true,
+            //         ws: true,
+            //         secure: true,
+            //         rewrite: (path) => path.replace(/^\/api/, '')
+            //     }
+            // }
+        }
     };
 });
