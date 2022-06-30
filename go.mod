@@ -1,4 +1,4 @@
-module wails-chat
+module wailschat
 
 go 1.17
 
