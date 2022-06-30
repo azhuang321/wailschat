@@ -1,0 +1,14 @@
+{
+  "name": "chat",
+  "outputfilename": "chat",
+  "assetdir": "frontend/dist",
+  "frontend:install": "",
+  "frontend:build": "",
+  "frontend:dev:watcher": "yarn dev",
+  "frontend:dev:serverUrl": "http://localhost:3000",
+  "debounceMS": 1000,
+  "author": {
+    "name": "azhuang321",
+    "email": "azhuang321@gmail.com"
+  }
+}
