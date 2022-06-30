@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as path from 'path';
 import type { Plugin, ResolvedConfig } from 'vite';
 
@@ -5,6 +6,7 @@ export default function fullImportPlugin() {
     let config: ResolvedConfig;
     return <Plugin>{
         name: 'fullImportElementPlus',
+        // @ts-ignore
         async configResolved(conf) {
             config = conf;
         },
