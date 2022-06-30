@@ -4,9 +4,9 @@ import { onMyInfo } from '@/utils/nim/user';
 await import('../../nim_sdk/NIM_Web_NIM_v9.2.0.js');
 let nim = null;
 
-import * as nimtest from 'nim';
-console.dir(nimtest);
-console.dir(window.NIM);
+// import * as nimtest from 'nim';
+// console.dir(nimtest);
+// console.dir(window.NIM);
 
 /**
  * 文档地址
