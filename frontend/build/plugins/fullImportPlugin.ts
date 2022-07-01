@@ -16,7 +16,7 @@ export default function fullImportPlugin() {
                 const name = 'ElementPlus';
 
                 // 引入 ElementPlus 和 样式
-                const prepend = `import ${name} from 'element-plus';\nimport 'element-plus/dist/index.css';\n`;
+                const prepend = `import ${name} from 'element-plus';\nimport 'element-plus/dist/index.css';\nimport * as ElementPlusIconsVue from '@element-plus/icons-vue'\n`;
 
                 // 通过匹配字符串来使用 ElementPlus （此处替换规则根据 main.js 的情况而定）
                 // 相当于将字符串 `app.use(router).mount('#app')` 替换成 `app.use(router).use(ElementPlus).mount('#app')`
