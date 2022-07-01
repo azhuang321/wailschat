@@ -1,6 +1,6 @@
 <template>
     <div>
-        <MainLayout :idx="0" v-slot:container>
+        <MainLayout #container :idx="0">
             <el-container class="full-height">
                 <!-- 左侧侧边栏 -->
                 <el-aside width="320px" class="aside-box">
@@ -16,15 +16,10 @@
                             </div>
 
                             <!-- 工具栏 -->
-                            <div class="tools" v-outside="closeSubMenu">
-                                <el-button
-                                    circle
-                                    plain
-                                    :icon="Plus"
-                                    @click="subMenu = !subMenu"
-                                />
+                            <div v-outside="closeSubMenu" class="tools">
+                                <el-button circle plain :icon="Plus" @click="subMenu = !subMenu" />
                                 <transition name="el-zoom-in-top">
-                                    <div class="tools-menu" v-show="subMenu">
+                                    <div v-show="subMenu" class="tools-menu">
                                         <div class="menu-item" @click="triggerSubMenu(1)">
                                             创建群组
                                         </div>
@@ -197,8 +192,6 @@
                                         </template>
                                       </el-main>
                                     </el-scrollbar>-->
-
-
                     </el-container>
                 </el-aside>
 
@@ -250,9 +243,7 @@ import { ServeSecedeGroup } from '@/api/group';
 import { beautifyTime } from '@/utils/functions';
 import { findTalkIndex, getCacheIndexName } from '@/utils/talk';
 
-import {
-    Plus, Search
-} from '@element-plus/icons-vue';
+import { Plus, Search } from '@element-plus/icons-vue';
 
 const title = document.title;
 
@@ -266,10 +257,20 @@ export default {
         WelcomeModule,
         UTime
     },
-    data () {
+
+    beforeRouteUpdate(to, from, next) {
+        const index_name = getCacheIndexName();
+
+        if (index_name) {
+            this.clickTab(index_name);
+        }
+
+        next();
+    },
+    data() {
         return {
-            Plus,
-            Search,
+            Plus: markRaw(Plus),
+            Search: markRaw(Search),
             subHeaderShadow: false,
             launchGroupShow: false,
 
@@ -298,7 +299,7 @@ export default {
             index_name: state => state.dialogue.index_name
         }),
         // 计算置顶栏目的高度
-        subHeaderPx () {
+        subHeaderPx() {
             const n = 7; // 一排能显示的用户数
             const num = this.topItems.length;
             let len = 60;
@@ -310,42 +311,35 @@ export default {
             return `${len}px`;
         },
         // 当前对话好友在线状态
-        isFriendOnline () {
+        isFriendOnline() {
             const index = findTalkIndex(this.index_name);
             return index >= 0 && this.talks[index].is_online == 1;
         }
     },
     watch: {
-        unreadNum (value) {
+        unreadNum(value) {
             clearInterval(this.interval);
 
             if (value > 0) {
                 this.interval = setInterval(() => {
-                    document.title =
-                        document.title == title ? `【新消息】${title}` : title;
+                    document.title = document.title == title ? `【新消息】${title}` : title;
                 }, 2000);
             } else {
                 document.title = title;
             }
         }
     },
-
-    beforeRouteUpdate (to, from, next) {
+    created() {
         const index_name = getCacheIndexName();
 
-        if (index_name) this.clickTab(index_name);
-
-        next();
+        if (index_name) {
+            this.clickTab(index_name);
+        }
     },
-    created () {
-        const index_name = getCacheIndexName();
-
-        if (index_name) this.clickTab(index_name);
-    },
-    mounted () {
+    mounted() {
         this.scrollEvent();
     },
-    unmounted () {
+    unmounted() {
         document.title = title;
         clearInterval(this.interval);
         this.clearTalk();
@@ -355,12 +349,12 @@ export default {
         beautifyTime,
 
         // header 功能栏隐藏事件
-        closeSubMenu () {
+        closeSubMenu() {
             this.subMenu = false;
         },
 
         // 清除当前对话
-        clearTalk () {
+        clearTalk() {
             this.params = {
                 talk_type: 0,
                 receiver_id: 0,
@@ -375,7 +369,7 @@ export default {
         },
 
         // 工具栏事件
-        triggerSubMenu (type) {
+        triggerSubMenu(type) {
             this.closeSubMenu();
 
             if (type == 1) {
@@ -386,7 +380,7 @@ export default {
         },
 
         // 监听自定义滚动条事件
-        scrollEvent () {
+        scrollEvent() {
             // const scrollbarEl = this.$refs.menusScrollbar.wrap;
             // scrollbarEl.onscroll = () => {
             //     this.subHeaderShadow = scrollbarEl.scrollTop > 0;
@@ -394,17 +388,19 @@ export default {
         },
 
         // 发起群聊成功后回调方法
-        groupChatSuccess (data) {
+        groupChatSuccess(data) {
             this.launchGroupShow = false;
             sessionStorage.setItem('send_message_index_name', `2_${data.group_id}`);
             this.$store.dispatch('LOAD_TALK_ITEMS');
         },
 
         // 切换聊天栏目
-        clickTab (index_name) {
+        clickTab(index_name) {
             const index = findTalkIndex(index_name);
 
-            if (index == -1) return;
+            if (index == -1) {
+                return;
+            }
 
             const item = this.talks[index];
             const [talk_type, receiver_id] = index_name.split('_');
@@ -440,13 +436,13 @@ export default {
         },
 
         // 修改当前对话
-        changeTalk (index_name) {
+        changeTalk(index_name) {
             sessionStorage.setItem('send_message_index_name', index_name);
             this.$store.dispatch('LOAD_TALK_ITEMS');
         },
 
         // 关闭当前对话及刷新对话列表
-        closeTalk () {
+        closeTalk() {
             this.$store.commit('UPDATE_DIALOGUE_MESSAGE', {
                 talk_type: 0,
                 receiver_id: 0,
@@ -457,7 +453,7 @@ export default {
         },
 
         // 对话列表的右键自定义菜单
-        talkItemsMenu (item, event) {
+        talkItemsMenu(item, event) {
             const items = {
                 items: [
                     {
@@ -485,10 +481,7 @@ export default {
                     },
                     {
                         label: item.is_disturb == 0 ? '消息免打扰' : '开启消息提示',
-                        icon:
-                            item.is_disturb == 0
-                                ? 'el-icon-close-notification'
-                                : 'el-icon-bell',
+                        icon: item.is_disturb == 0 ? 'el-icon-close-notification' : 'el-icon-bell',
                         disabled: item.is_robot == 1,
                         onClick: () => {
                             this.setNotDisturb(item);
@@ -537,7 +530,7 @@ export default {
         },
 
         // 置顶栏右键菜单栏
-        topItemsMenu (item, event) {
+        topItemsMenu(item, event) {
             this.$contextmenu({
                 items: [
                     {
@@ -556,7 +549,7 @@ export default {
         },
 
         // 会话列表置顶
-        topChatItem (item) {
+        topChatItem(item) {
             ServeTopTalkList({
                 list_id: item.id,
                 type: item.is_top == 0 ? 1 : 2
@@ -571,7 +564,7 @@ export default {
         },
 
         // 设置消息免打扰
-        setNotDisturb (item) {
+        setNotDisturb(item) {
             ServeSetNotDisturb({
                 talk_type: item.talk_type,
                 receiver_id: item.receiver_id,
@@ -587,7 +580,7 @@ export default {
         },
 
         // 移除会话列表
-        delChatItem (item) {
+        delChatItem(item) {
             ServeDeleteTalkList({
                 list_id: item.id
             }).then(({ code }) => {
@@ -599,7 +592,7 @@ export default {
         },
 
         // 解除好友关系
-        removeFriend (item) {
+        removeFriend(item) {
             ServeDeleteContact({
                 friend_id: item.receiver_id
             }).then(({ code }) => {
@@ -614,7 +607,7 @@ export default {
         },
 
         // 退出群聊
-        removeGroup (item) {
+        removeGroup(item) {
             ServeSecedeGroup({
                 group_id: item.receiver_id
             }).then(({ code }) => {
@@ -629,7 +622,7 @@ export default {
         },
 
         // 修改好友备注信息
-        editFriendRemarks (item) {
+        editFriendRemarks(item) {
             let title = `您正在设置【${item.name}】好友的备注信息`;
 
             if (item.remark_name) {
@@ -642,7 +635,7 @@ export default {
                 customClass: 'border-radius0',
                 inputPlaceholder: '请设置好友备注信息',
                 inputValue: item.remark_name ? item.remark_name : item.name,
-                inputValidator (val) {
+                inputValidator(val) {
                     return val == null || val == '' ? '好友备注不能为空' : true;
                 }
             })
@@ -675,8 +668,7 @@ export default {
                         }
                     });
                 })
-                .catch(() => {
-                });
+                .catch(() => {});
         }
     }
 };
@@ -685,7 +677,6 @@ export default {
 :deep(.el-scrollbar__wrap) {
     overflow-x: hidden;
 }
-
 
 .aside-box {
     position: relative;
@@ -704,7 +695,7 @@ export default {
             flex: 1 1;
             flex-shrink: 0;
 
-            :deep(.el-input .el-input__wrapper){
+            :deep(.el-input .el-input__wrapper) {
                 border-radius: 20px;
             }
         }
@@ -992,7 +983,6 @@ export default {
         }
     }
 }
-
 
 @media screen and (max-width: 800px) {
     .aside-box {

@@ -35,25 +35,17 @@
                 </el-form-item>
                 <el-form-item>
                     <div class="links">
-                        <el-link
-                            type="primary"
-                            :underline="false"
-                            @click="toLink('/auth/forget')"
-                        >
+                        <el-link type="primary" :underline="false" @click="toLink('/auth/forget')">
                             找回密码
                         </el-link>
-                        <el-link
-                            type="primary"
-                            :underline="false"
-                            @click="toLink('/auth/login')"
-                        >
+                        <el-link type="primary" :underline="false" @click="toLink('/auth/login')">
                             已有账号，立即登录?
                         </el-link>
                     </div>
                 </el-form-item>
 
                 <el-divider>
-                    <span><i-ep-Iphone/>预览账号</span>
+                    <span><i-ep-Iphone />预览账号</span>
                 </el-divider>
                 <el-form-item class="preview-account">
                     <p>预览账号:18798272054 / 密码: admin123</p>
@@ -70,7 +62,7 @@ import { ServeLogin } from '@/api/auth';
 
 import { getNimInstance } from '@/utils/nim/init';
 import { isConnect } from '@/utils/nim/callback';
-import { useStore } from 'vuex';
+// import { useStore } from 'vuex';
 
 let router = null;
 let store = null;
@@ -84,22 +76,30 @@ const useFormDataEffect = () => {
         password: ''
     });
     const rules = {
-        username: [{
-            required: true,
-            message: '登录账号不能为空!',
-            trigger: 'blur'
-        }],
-        password: [{
-            required: true,
-            message: '登录密码不能为空!',
-            trigger: 'blur'
-        }]
+        username: [
+            {
+                required: true,
+                message: '登录账号不能为空!',
+                trigger: 'blur'
+            }
+        ],
+        password: [
+            {
+                required: true,
+                message: '登录密码不能为空!',
+                trigger: 'blur'
+            }
+        ]
     };
     const { login, loginLoading } = useLoginEffect();
-    const handleSubmit = (ruleForms) => {
-        if (loginLoading.value) return false;
+    const handleSubmit = ruleForms => {
+        if (loginLoading.value) {
+            return false;
+        }
         ruleForms.validate(valid => {
-            if (!valid) return false;
+            if (!valid) {
+                return false;
+            }
             loginLoading.value = true;
             login(form);
             return true;
@@ -116,9 +116,9 @@ const useFormDataEffect = () => {
 
 const useLoginEffect = () => {
     const loginLoading = ref(false);
-    const login = (form) => {
+    const login = form => {
         getNimInstance();
-        watch(isConnect, (isConnect) => {
+        watch(isConnect, isConnect => {
             if (isConnect === true) {
                 loginLoading.value = !isConnect;
                 store.commit('UPDATE_SOCKET_STATUS', true);
@@ -140,7 +140,6 @@ const useLoginEffect = () => {
     };
 };
 
-
 export default {
     name: 'Login'
 };
@@ -153,7 +152,6 @@ store = useStore();
 const { rules, form, ruleForms, handleSubmit } = useFormDataEffect();
 const { loginLoading } = useLoginEffect;
 
-
 setTimeout(() => {
     ElNotification({
         type: 'success',
@@ -161,30 +159,26 @@ setTimeout(() => {
         message: h('i', { style: 'color: teal' }, 'This is a reminder')
     });
 }, 1000);
-
-
 </script>
 
 <style lang="scss" scoped>
-
 $hl-bg-cl: white;
 $lw-cl: #2d2c2c;
-
 
 .login-box {
     width: 3.9rem;
     min-height: 4.8rem;
     background-color: $hl-bg-cl;
-    border-radius: .05rem;
+    border-radius: 0.05rem;
     margin: auto; // 特别重要，由于flex布局超出的内容是向上溢出，导致浏览器不会出现该有的滚动条
-    padding: .1rem .2rem;
+    padding: 0.1rem 0.2rem;
     box-shadow: 0 4px 14px 0 rgba(206, 207, 209, 0.5);
 
     .header {
         width: 100%;
-        height: .38rem;
-        font-size: .22rem;
-        margin: .25rem 0 .25rem 0;
+        height: 0.38rem;
+        font-size: 0.22rem;
+        margin: 0.25rem 0 0.25rem 0;
     }
 
     .main {
@@ -199,20 +193,20 @@ $lw-cl: #2d2c2c;
 
         .el-form {
             .el-input {
-                height: .4rem;
-                line-height: .4rem;
+                height: 0.4rem;
+                line-height: 0.4rem;
             }
 
             .submit-btn {
                 width: 100%;
-                height: .4rem;
+                height: 0.4rem;
             }
 
             .preview-account p {
                 display: flex;
                 width: 100%;
                 justify-content: center;
-                font-size: .12rem;
+                font-size: 0.12rem;
                 color: $lw-cl;
                 font-weight: 100;
                 margin: 0;
@@ -223,18 +217,16 @@ $lw-cl: #2d2c2c;
 
                 span {
                     display: flex;
-                    font-size: .14rem;
+                    font-size: 0.14rem;
                     font-weight: 200;
                     color: $lw-cl;
 
                     svg {
-                        margin-right: .05rem;
+                        margin-right: 0.05rem;
                     }
                 }
             }
         }
-
-
     }
 }
 </style>

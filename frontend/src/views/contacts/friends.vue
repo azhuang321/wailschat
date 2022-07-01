@@ -67,7 +67,7 @@
 <script>
 import Empty from '@/components/global/Empty.vue';
 import Loading from '@/components/global/Loading.vue';
-import { toTalk } from '@/utils/talk';
+// import { toTalk } from '@/utils/talk';
 import { getFriends } from '@/utils/nim/user';
 
 import defaultAvatar from '@/assets/image/detault-avatar.jpg';
@@ -166,6 +166,8 @@ export default {
 
 <script setup>
 import {ElNotification} from "element-plus";
+// import { useStore1 } from '@/pinia/test';
+// const testStore = useStore1();
 
 const { defaultAvatar, friendsListStatue, friendsList, getFriendsListFunc } = useFriendsListEffect();
 const { showCardFunc } = useShowUserInfoEffect();
