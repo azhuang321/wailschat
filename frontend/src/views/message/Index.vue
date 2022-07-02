@@ -240,6 +240,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import loadsh from 'loadsh';
 import MainLayout from '@/views/layout/MainLayout.vue';
 import WelcomeModule from '@/components/layout/WelcomeModule.vue';
 import GroupLaunch from '@/components/group/GroupLaunch.vue';
@@ -690,23 +691,21 @@ export default {
 };
 </script>
 <script setup>
-import { getServerSessions, getUsers } from '@/utils/nim/user';
+import { getSessionList } from '@/utils/nim/user';
+import { ElNotification } from 'element-plus';
 
 const useSessionListEffect = () => {
     const sessionList = reactive([]);
-    getServerSessions()
-        .then(res => {
-            console.log(res);
-            if (res.sessionList.length > 0) {
-                let sessionAccounts = res.sessionList.map(res => {
-                    return res.id.split('p2p-')[1];
-                });
-                return getUsers(sessionAccounts, false);
-            }
-        })
+    getSessionList()
         .then(res => {
             sessionList.length = 0;
             sessionList.push(...res);
+        })
+        .catch(res => {
+            ElNotification({
+                type: 'error',
+                message: '获取对话列表失败'
+            });
         });
     return {
         sessionList

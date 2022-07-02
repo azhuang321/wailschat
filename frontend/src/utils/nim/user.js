@@ -1,19 +1,11 @@
-import { getNimInstance } from '@/utils/nim/init';
+import { getNimInstance, getFriends, getUsers, getServerSessions } from '@/utils/nim/index';
 
-// 回调: 用户信息
-const onMyInfo = obj => {
-    console.log('my info', obj);
-};
-
-// 获取用户好友
-const getFriends = async () => {
-    const nim = await getNimInstance();
+// 获取好友列表
+export const getFriendList = async () => {
+    let nim = await getNimInstance();
     return new Promise((resolve, reject) => {
-        nim.getFriends({
-            done: async (error, friends) => {
-                if (error) {
-                    return reject(error);
-                }
+        getFriends()
+            .then(async friends => {
                 const friendsAccounts = friends.map(i => i.account);
                 const usersInfo = await getUsers(friendsAccounts, false);
                 const friendsList = nim.cutFriends(
@@ -21,84 +13,43 @@ const getFriends = async () => {
                     friends.invalid
                 );
                 resolve(friendsList);
-            }
-        });
+            })
+            .catch(err => {
+                reject(err);
+            });
     });
 };
 
-// 获取多个用户名片
-const getUsers = async (accounts, isSync = true) => {
-    const nim = await getNimInstance();
+// 获取回话列表
+export const getSessionList = async () => {
+    let sessionServerList = [];
     return new Promise((resolve, reject) => {
-        nim.getUsers({
-            accounts: accounts,
-            sync: isSync,
-            done: (error, users) => {
-                if (error) {
-                    return reject(error);
+        getServerSessions()
+            .then(res => {
+                if (res.sessionList.length > 0) {
+                    let sessionAccounts = res.sessionList.map(res => {
+                        let account = res.id.split('p2p-')[1];
+                        res.id = account;
+                        return account;
+                    });
+                    sessionServerList = res.sessionList;
+                    //todo 发现不存在的用户，需要去服务器同步
+                    return getUsers(sessionAccounts, false);
                 }
-                resolve(users);
-            }
-        });
+            })
+            .then(res => {
+                sessionServerList.map((val1, index) => {
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].account === val1.id) {
+                            sessionServerList[index] = Object.assign(res[i], val1);
+                            continue;
+                        }
+                    }
+                });
+                resolve(sessionServerList);
+            })
+            .catch(err => {
+                reject(err);
+            });
     });
 };
-
-// 获取单个个用户名片
-const getUser = async (account, isSync = true) => {
-    const nim = await getNimInstance();
-    return new Promise((resolve, reject) => {
-        nim.getUser({
-            account: account,
-            sync: isSync,
-            done: (error, user) => {
-                if (error) {
-                    return reject(error);
-                }
-                resolve(user);
-            }
-        });
-    });
-};
-
-// 更新用户好友信息
-const updateFriend = async (account, alias = '', custom = '') => {
-    const nim = await getNimInstance();
-    return new Promise((resolve, reject) => {
-        nim.updateFriend({
-            account: account,
-            alias: alias,
-            done: (error, obj) => {
-                if (error) {
-                    return reject(error);
-                }
-                resolve(obj);
-            }
-        });
-    });
-};
-
-const getServerSessions = async () => {
-    const nim = await getNimInstance();
-    return new Promise((resolve, reject) => {
-        nim.getServerSessions({
-            // minTimestamp: 1571039417853,
-            // maxTimestamp: 1571039418800,
-            needLastMsg: true,
-            done: (error, obj) => {
-                if (error) {
-                    return reject(error);
-                }
-                resolve(obj);
-            }
-        });
-    });
-};
-
-export { onMyInfo, getFriends, getUsers, getUser, updateFriend, getServerSessions };
-
-// 去重数组
-// const test = friends.reduce((acc, { account }) => {
-//     if (!acc.includes(account)) acc.push(account);
-//     return acc;
-// }, []);
-// console.dir(test);

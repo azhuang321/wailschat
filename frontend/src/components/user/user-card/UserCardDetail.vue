@@ -106,7 +106,7 @@ import { ServeSearchUser, ServeCreateContact, ServeEditContactRemark } from '@/a
 import { toTalk } from '@/utils/talk';
 
 import defaultUserBanner from '@/assets/image/default-user-banner.png';
-import { getUser, updateFriend } from '@/utils/nim/user';
+import { getUser, updateFriend } from '@/utils/nim/index';
 import defaultAvatar from '@/assets/image/detault-avatar.jpg';
 import { Promotion, Close, Select, Edit } from '@element-plus/icons-vue';
 

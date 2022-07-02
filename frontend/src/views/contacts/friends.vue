@@ -68,7 +68,7 @@
 import Empty from '@/components/global/Empty.vue';
 import Loading from '@/components/global/Loading.vue';
 // import { toTalk } from '@/utils/talk';
-import { getFriends } from '@/utils/nim/user';
+import { getFriendList } from '@/utils/nim/user';
 
 import defaultAvatar from '@/assets/image/detault-avatar.jpg';
 import { ElNotification } from 'element-plus';
@@ -77,7 +77,7 @@ const useFriendsListEffect = () => {
     const friendsList = reactive([]);
     const friendsListStatue = ref(0);
     const getFriendsListFunc = () => {
-        getFriends().then((friends) => {
+        getFriendList().then((friends) => {
             friendsList.length = 0;
             friendsList.push(...friends);
         }).catch((err) => {
