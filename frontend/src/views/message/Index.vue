@@ -75,138 +75,152 @@
                                     </header>-->
 
                         <!-- 对话列表栏 -->
-                        <!--            <el-scrollbar
-                                      tag="section"
-                                      ref="menusScrollbar"
-                                      class="full-height"
-                                      :native="false"
+                        <el-scrollbar
+                            ref="menusScrollbar"
+                            tag="section"
+                            class="full-height"
+                            :native="false"
+                        >
+                            <el-main class="main">
+                                <p v-show="loadStatus == 2" class="empty-data">
+                                    <i class="el-icon-loading"></i> 数据加载中...
+                                </p>
+
+                                <p v-show="loadStatus == 3 && talkNum == 0" class="empty-data">
+                                    暂无聊天消息
+                                </p>
+
+                                <p v-show="loadStatus == 3 && talkNum > 0" class="main-menu">
+                                    <span class="title">消息记录 ({{ talkNum }})</span>
+                                </p>
+
+                                <!-- <p v-show="loadStatus == 4" style="text-align:center;">数据加载失败，请点击重试！</p> -->
+
+                                <!-- 对话列表 -->
+                                <template v-if="loadStatus != 3">
+                                    <div
+                                        v-for="item in sessionList"
+                                        :key="item.id"
+                                        class="talk-item pointer"
+                                        :class="{ active: index_name == item.index_name }"
+                                        @click="clickTab(item.index_name)"
+                                        @contextmenu.prevent="talkItemsMenu(item, $event)"
                                     >
-                                      <el-main class="main">
-                                        <p v-show="loadStatus == 2" class="empty-data">
-                                          <i class="el-icon-loading" /> 数据加载中...
-                                        </p>
-
-                                        <p v-show="loadStatus == 3 && talkNum == 0" class="empty-data">
-                                          暂无聊天消息
-                                        </p>
-
-                                        <p v-show="loadStatus == 3 && talkNum > 0" class="main-menu">
-                                          <span class="title">消息记录 ({{ talkNum }})</span>
-                                        </p>
-
-                                        &lt;!&ndash; <p v-show="loadStatus == 4" style="text-align:center;">数据加载失败，请点击重试！</p> &ndash;&gt;
-
-                                        &lt;!&ndash; 对话列表 &ndash;&gt;
-                                        <template v-if="loadStatus == 3">
-                                          <div
-                                            v-for="item in talkItems"
-                                            :key="item.index_name"
-                                            class="talk-item pointer"
-                                            :class="{ active: index_name == item.index_name }"
-                                            @click="clickTab(item.index_name)"
-                                            @contextmenu.prevent="talkItemsMenu(item, $event)"
-                                          >
-                                            <div class="avatar-box">
-                                              <span v-show="!item.avatar">
-                                                {{
-                                                  (item.remark_name
-                                                      ? item.remark_name
-                                                      : item.name
-                                                  ).substr(0, 1)
-                                                }}
-                                              </span>
-                                              <img
+                                        <div class="avatar-box">
+                                            <span v-show="!item.avatar">
+                                                <!--                                                {{-->
+                                                <!--                                                    (item.remark_name-->
+                                                <!--                                                        ? item.remark_name-->
+                                                <!--                                                        : item.name-->
+                                                <!--                                                    ).substr(0, 1)-->
+                                                <!--                                                }}-->
+                                            </span>
+                                            <img
                                                 v-show="item.avatar"
                                                 :src="item.avatar"
                                                 :onerror="$store.state.detaultAvatar"
-                                              />
-                                              <div
+                                            />
+                                            <div
                                                 v-show="item.is_top == 0"
                                                 class="top-mask"
                                                 @click.stop="topChatItem(item)"
-                                              >
-                                                <i class="el-icon-top" />
-                                              </div>
+                                            >
+                                                <i class="el-icon-top"></i>
                                             </div>
-                                            <div class="card-box">
-                                              <div class="title">
+                                        </div>
+                                        <div class="card-box">
+                                            <div class="title">
                                                 <div class="card-name">
-                                                  <p class="nickname">
-                                                    {{
-                                                      item.remark_name ? item.remark_name : item.name
-                                                    }}
-                                                  </p>
-                                                  <div v-show="item.unread_num" class="larkc-tag">
-                                                    {{ item.unread_num }}条未读
-                                                  </div>
-                                                  <div v-show="item.is_top" class="larkc-tag top">
-                                                    TOP
-                                                  </div>
+                                                    <p class="nickname">
+                                                        {{
+                                                            item.remark_name
+                                                                ? item.remark_name
+                                                                : item.name
+                                                        }}
+                                                    </p>
+                                                    <div v-show="item.unread_num" class="larkc-tag">
+                                                        {{ item.unread_num }}条未读
+                                                    </div>
+                                                    <div v-show="item.is_top" class="larkc-tag top">
+                                                        TOP
+                                                    </div>
 
-                                                  <div v-show="item.is_robot" class="larkc-tag top">
-                                                    BOT
-                                                  </div>
+                                                    <div
+                                                        v-show="item.is_robot"
+                                                        class="larkc-tag top"
+                                                    >
+                                                        BOT
+                                                    </div>
 
-                                                  <div
-                                                    v-show="item.talk_type == 2"
-                                                    class="larkc-tag group"
-                                                  >
-                                                    群组
-                                                  </div>
-                                                  <div
-                                                    v-show="item.is_disturb"
-                                                    class="larkc-tag disturb"
-                                                  >
-                                                    <i class="iconfont icon-xiaoximiandarao" />
-                                                  </div>
+                                                    <div
+                                                        v-show="item.talk_type == 2"
+                                                        class="larkc-tag group"
+                                                    >
+                                                        群组
+                                                    </div>
+                                                    <div
+                                                        v-show="item.is_disturb"
+                                                        class="larkc-tag disturb"
+                                                    >
+                                                        <i
+                                                            class="iconfont icon-xiaoximiandarao"
+                                                        ></i>
+                                                    </div>
                                                 </div>
                                                 <div class="card-time">
-                                                  <u-time :value="item.updated_at" />
+                                                    <u-time :value="item.updated_at" />
                                                 </div>
-                                              </div>
-                                              <div class="content">
+                                            </div>
+                                            <div class="content">
                                                 <template
-                                                  v-if="
-                                                    index_name != item.index_name && item.draft_text
-                                                  "
+                                                    v-if="
+                                                        index_name != item.index_name &&
+                                                        item.draft_text
+                                                    "
                                                 >
-                                                  <span class="draft-color">[草稿]</span>
-                                                  <span>{{ item.draft_text }}</span>
+                                                    <span class="draft-color">[草稿]</span>
+                                                    <span>{{ item.draft_text }}</span>
                                                 </template>
                                                 <template v-else>
-                                                  <template v-if="item.is_robot == 0">
-                                                    <span
-                                                      v-if="item.talk_type == 1"
-                                                      :class="{ 'online-color': item.is_online == 1 }"
-                                                    >
-                                                      [{{ item.is_online == 1 ? '在线' : '离线' }}]
-                                                    </span>
-                                                    <span v-else>[群消息]</span>
-                                                  </template>
+                                                    <template v-if="item.is_robot == 0">
+                                                        <span
+                                                            v-if="item.talk_type == 1"
+                                                            :class="{
+                                                                'online-color': item.is_online == 1
+                                                            }"
+                                                        >
+                                                            [{{
+                                                                item.is_online == 1
+                                                                    ? '在线'
+                                                                    : '离线'
+                                                            }}]
+                                                        </span>
+                                                        <span v-else>[群消息]</span>
+                                                    </template>
 
-                                                  <span>{{ item.msg_text }}</span>
+                                                    <span>{{ item.msg_text }}</span>
                                                 </template>
-                                              </div>
                                             </div>
-                                          </div>
-                                        </template>
-                                      </el-main>
-                                    </el-scrollbar>-->
+                                        </div>
+                                    </div>
+                                </template>
+                            </el-main>
+                        </el-scrollbar>
                     </el-container>
                 </el-aside>
 
                 <!-- 聊天面板容器 -->
-                <!--        <el-main class="ov-hidden full-height no-padding">
-                          <WelcomeModule v-if="index_name == null" />
-                          <TalkPanel
-                            v-else
-                            class="full-height"
-                            :params="params"
-                            :is-online="isFriendOnline"
-                            @change-talk="changeTalk"
-                            @close-talk="closeTalk"
-                          />
-                        </el-main>-->
+                <el-main class="ov-hidden full-height no-padding">
+                    <WelcomeModule v-if="index_name == null" />
+                    <TalkPanel
+                        v-else
+                        class="full-height"
+                        :params="params"
+                        :is-online="isFriendOnline"
+                        @change-talk="changeTalk"
+                        @close-talk="closeTalk"
+                    />
+                </el-main>
 
                 <!-- <el-aside width="350px" class="panel-aside"></el-aside> -->
             </el-container>
@@ -288,11 +302,13 @@ export default {
             subMenu: false,
 
             // 消息未读数计时器
-            interval: null
+            interval: null,
+            talkItems: [{ index_name: '123', remark_name: '123' }]
         };
     },
     computed: {
-        ...mapGetters(['topItems', 'talkItems', 'unreadNum', 'talkNum']),
+        ...mapGetters(['topItems', 'unreadNum', 'talkNum']),
+        // ...mapGetters(['topItems', 'talkItems', 'unreadNum', 'talkNum']),
         ...mapState({
             loadStatus: state => state.talks.loadStatus,
             talks: state => state.talks.items,
@@ -396,11 +412,11 @@ export default {
 
         // 切换聊天栏目
         clickTab(index_name) {
-            const index = findTalkIndex(index_name);
-
-            if (index == -1) {
-                return;
-            }
+            // const index = findTalkIndex(index_name);
+            //
+            // if (index == -1) {
+            //     return;
+            // }
 
             const item = this.talks[index];
             const [talk_type, receiver_id] = index_name.split('_');
@@ -672,6 +688,32 @@ export default {
         }
     }
 };
+</script>
+<script setup>
+import { getServerSessions, getUsers } from '@/utils/nim/user';
+
+const useSessionListEffect = () => {
+    const sessionList = reactive([]);
+    getServerSessions()
+        .then(res => {
+            console.log(res);
+            if (res.sessionList.length > 0) {
+                let sessionAccounts = res.sessionList.map(res => {
+                    return res.id.split('p2p-')[1];
+                });
+                return getUsers(sessionAccounts, false);
+            }
+        })
+        .then(res => {
+            sessionList.length = 0;
+            sessionList.push(...res);
+        });
+    return {
+        sessionList
+    };
+};
+
+const { sessionList } = useSessionListEffect();
 </script>
 <style lang="scss" scoped>
 :deep(.el-scrollbar__wrap) {

@@ -1,22 +1,22 @@
 <template>
     <div class="lum-dialog-mask animated fadeIn">
-        <el-container class="container" v-outside="close">
+        <el-container v-outside="close" class="container">
             <el-header class="no-padding header" height="180px">
-                <span class="close pointer" @click="close"><i-ep-Close/></span>
+                <span class="close pointer" @click="close"><Close /></span>
                 <div class="img-banner">
-                    <img :src="detail.bag" class="img-banner"/>
+                    <img :src="detail.bag" class="img-banner" />
                 </div>
                 <div class="user-header">
                     <div class="avatar">
                         <div class="avatar-box">
-                            <img :src="detail.avatar || defaultAvatar" :onerror="defaultAvatar"/>
+                            <img :src="detail.avatar || defaultAvatar" :onerror="defaultAvatar" />
                         </div>
                     </div>
                     <div class="nickname">
-                        <i class="iconfont icon-qianming"/>
+                        <i class="iconfont icon-qianming"></i>
                         <span>{{ detail.nickname || '未设置昵称' }}</span>
                         <div class="share no-select">
-                            <i class="iconfont icon-fenxiang3"/> <span>分享</span>
+                            <i class="iconfont icon-fenxiang3"></i> <span>分享</span>
                         </div>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
             <el-main class="no-padding main">
                 <div class="user-sign">
                     <div class="sign-arrow"></div>
-                    <i class="iconfont icon-bianji"/>
+                    <i class="iconfont icon-bianji"></i>
                     <span>编辑个签，展示我的独特态度。 </span>
                 </div>
 
@@ -44,30 +44,21 @@
                     <div class="card-row">
                         <label>备注</label>
                         <span v-if="remarkData.isShow === false">
-                            {{remarkData.text ? remarkData.text : '暂无备注' }}
+                            <span>{{ remarkData.text ? remarkData.text : '暂无备注' }}</span>
+                            <Edit v-show="!remarkData.isShow" @click="handClickEditRemark" />
                         </span>
                         <span v-else>
-                          <input
-                              v-model="remarkData.text"
-                              v-focus
-                              class="friend-remark"
-                              type="text"
-                              @blur="handleBlurRemark"
-                              @keyup.enter="handleEditRemarkSubmit"
-                          />
-                            <el-button
-                                class="submit-btn"
-                                :loading="saveRemarkLoading"
+                            <input
+                                v-model="remarkData.text"
+                                v-focus
+                                class="friend-remark"
+                                type="text"
+                                @blur="handleBlurRemark"
+                                @keyup.enter="handleEditRemarkSubmit"
                             />
-                            <i-ep-Select
-                                v-show="remarkData.isShow"
-                                @click="handleEditRemarkSubmit"
-                            />
+                            <el-button class="submit-btn" :loading="saveRemarkLoading" />
+                            <Select v-show="remarkData.isShow" @click="handleEditRemarkSubmit" />
                         </span>
-                        <i-ep-Edit
-                            v-show="!remarkData.isShow"
-                            @click="handClickEditRemark"
-                        />
                     </div>
 
                     <div class="card-row">
@@ -77,15 +68,13 @@
                     </div>
                 </div>
             </el-main>
-            <el-footer
-                class="no-padding footer"
-                height="50px"
-            >
+            <el-footer class="no-padding footer" height="50px">
                 <el-button
                     type="primary"
                     :icon="PromotionIcon"
-                    @click="sendMessage(detail)"
-                >发消息
+                    @click="sendMessage($event, detail)"
+                >
+                    发消息
                 </el-button>
             </el-footer>
 
@@ -106,9 +95,7 @@
                         placeholder="(必填项)"
                         @keyup.enter="sendApply"
                     />
-                    <el-button type="primary" size="small" @click="sendApply">
-                        立即提交
-                    </el-button>
+                    <el-button type="primary" size="small" @click="sendApply"> 立即提交 </el-button>
                 </div>
             </div>
         </el-container>
@@ -121,9 +108,17 @@ import { toTalk } from '@/utils/talk';
 import defaultUserBanner from '@/assets/image/default-user-banner.png';
 import { getUser, updateFriend } from '@/utils/nim/user';
 import defaultAvatar from '@/assets/image/detault-avatar.jpg';
-import { Promotion } from '@element-plus/icons-vue';
+import { Promotion, Close, Select, Edit } from '@element-plus/icons-vue';
 
 import { ElNotification } from 'element-plus';
+
+const userIconEffect = () => {
+    return {
+        Close: markRaw(Close),
+        Select: markRaw(Select),
+        Edit: markRaw(Edit)
+    };
+};
 
 const useUserCardShowEffect = () => {
     const { props } = getCurrentInstance();
@@ -164,27 +159,32 @@ const useUserRemarkEffect = () => {
     });
 
     // 点击编辑备注信息
-    const handClickEditRemark = () => { remarkData.isShow = true; };
+    const handClickEditRemark = () => {
+        remarkData.isShow = true;
+    };
 
     // 编辑好友备注信息
     const saveRemarkLoading = ref(false);
     const handleEditRemarkSubmit = () => {
         saveRemarkLoading.value = true;
-        updateFriend(detail.account, remarkData.text).then((obj) => {
-            remarkData.text = obj.alias;
-            accountInfo.alias = obj.alias;
-            detail.alias = obj.alias;
-            console.log(obj);
-        }).catch((err) => {
-            ElNotification({
-                type: 'error',
-                message: '更新用户信息失败'
+        updateFriend(detail.account, remarkData.text)
+            .then(obj => {
+                remarkData.text = obj.alias;
+                accountInfo.alias = obj.alias;
+                detail.alias = obj.alias;
+                console.log(obj);
+            })
+            .catch(err => {
+                ElNotification({
+                    type: 'error',
+                    message: '更新用户信息失败'
+                });
+                remarkData.text = detail.alias;
+            })
+            .finally(() => {
+                saveRemarkLoading.value = false;
+                remarkData.isShow = false;
             });
-            remarkData.text = detail.alias;
-        }).finally(() => {
-            saveRemarkLoading.value = false;
-            remarkData.isShow = false;
-        });
     };
     const handleBlurRemark = () => {
         if (detail.alias === remarkData.text) {
@@ -194,8 +194,25 @@ const useUserRemarkEffect = () => {
         }
     };
 
-    return { remarkData, handClickEditRemark, handleEditRemarkSubmit, handleBlurRemark, saveRemarkLoading };
+    return {
+        remarkData,
+        handClickEditRemark,
+        handleEditRemarkSubmit,
+        handleBlurRemark,
+        saveRemarkLoading
+    };
 };
+let parentClose = null;
+const useSendMessageEffect = () => {
+    const sendMessage = (event, test) => {
+        parentClose();
+        toTalk(1, this.user_id);
+    };
+    return {
+        sendMessage
+    };
+};
+
 export default {
     name: 'UserCardDetail',
     props: {
@@ -205,7 +222,7 @@ export default {
         },
         close: Function
     },
-    data () {
+    data() {
         return {
             // 好友申请表单
             apply: {
@@ -218,8 +235,10 @@ export default {
     },
     methods: {
         // 发送添加好友申请
-        sendApply () {
-            if (this.apply.text == '') return;
+        sendApply() {
+            if (this.apply.text == '') {
+                return;
+            }
             ServeCreateContact({
                 friend_id: this.detail.user_id,
                 remark: this.apply.text
@@ -235,23 +254,32 @@ export default {
         },
 
         // 隐藏申请表单
-        closeApply () {
+        closeApply() {
             this.apply.isShow = false;
-        },
+        }
 
         // 发送好友消息
-        sendMessage () {
-            this.close();
-            toTalk(1, this.user_id);
-        }
+        // sendMessage() {
+        //     this.close();
+        //     toTalk(1, this.user_id);
+        // }
     }
 };
 </script>
 
 <script setup>
 const { close, detail, userGender, defaultAvatar, PromotionIcon } = useUserCardShowEffect();
-const { remarkData, handClickEditRemark, handleEditRemarkSubmit, handleBlurRemark, saveRemarkLoading } = useUserRemarkEffect();
+parentClose = close;
+const {
+    remarkData,
+    handClickEditRemark,
+    handleEditRemarkSubmit,
+    handleBlurRemark,
+    saveRemarkLoading
+} = useUserRemarkEffect();
 
+const { Close, Edit, Select } = userIconEffect();
+const { sendMessage } = useSendMessageEffect();
 </script>
 <style lang="scss" scoped>
 .container {
@@ -267,7 +295,7 @@ const { remarkData, handClickEditRemark, handleEditRemarkSubmit, handleBlurRemar
 
     .header {
         position: relative;
-        padding:0;
+        padding: 0;
 
         .close {
             position: absolute;
@@ -277,6 +305,7 @@ const { remarkData, handClickEditRemark, handleEditRemarkSubmit, handleBlurRemar
             transition: all 1s;
             z-index: 1;
             font-size: 20px;
+            width: 20px;
         }
 
         .img-banner {
@@ -420,8 +449,8 @@ const { remarkData, handClickEditRemark, handleEditRemarkSubmit, handleBlurRemar
             margin-right: 25px;
             color: #cbc5c5;
         }
-        .submit-btn{
-            border:none;
+        .submit-btn {
+            border: none;
         }
 
         .friend-remark {
@@ -431,13 +460,22 @@ const { remarkData, handClickEditRemark, handleEditRemarkSubmit, handleBlurRemar
             color: #736f6f;
             width: 60%;
             padding-right: 5px;
-            &:focus{
+            &:focus {
                 outline: none;
             }
         }
 
         .el-icon-edit-outline {
             margin-left: 3px !important;
+        }
+        display: flex;
+
+        span {
+            display: flex;
+            justify-content: space-between;
+            svg {
+                width: 20px;
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 import { getNimInstance } from '@/utils/nim/init';
 
 // 回调: 用户信息
-const onMyInfo = (obj) => {
+const onMyInfo = obj => {
     console.log('my info', obj);
 };
 
@@ -11,10 +11,15 @@ const getFriends = async () => {
     return new Promise((resolve, reject) => {
         nim.getFriends({
             done: async (error, friends) => {
-                if (error) return reject(error);
+                if (error) {
+                    return reject(error);
+                }
                 const friendsAccounts = friends.map(i => i.account);
                 const usersInfo = await getUsers(friendsAccounts, false);
-                const friendsList = nim.cutFriends(nim.mergeFriends(friends, usersInfo), friends.invalid);
+                const friendsList = nim.cutFriends(
+                    nim.mergeFriends(friends, usersInfo),
+                    friends.invalid
+                );
                 resolve(friendsList);
             }
         });
@@ -29,7 +34,9 @@ const getUsers = async (accounts, isSync = true) => {
             accounts: accounts,
             sync: isSync,
             done: (error, users) => {
-                if (error) return reject(error);
+                if (error) {
+                    return reject(error);
+                }
                 resolve(users);
             }
         });
@@ -44,7 +51,9 @@ const getUser = async (account, isSync = true) => {
             account: account,
             sync: isSync,
             done: (error, user) => {
-                if (error) return reject(error);
+                if (error) {
+                    return reject(error);
+                }
                 resolve(user);
             }
         });
@@ -59,18 +68,33 @@ const updateFriend = async (account, alias = '', custom = '') => {
             account: account,
             alias: alias,
             done: (error, obj) => {
-                if (error) return reject(error);
+                if (error) {
+                    return reject(error);
+                }
                 resolve(obj);
             }
         });
     });
 };
 
-
-export {
-    onMyInfo, getFriends, getUsers, getUser, updateFriend
+const getServerSessions = async () => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        nim.getServerSessions({
+            // minTimestamp: 1571039417853,
+            // maxTimestamp: 1571039418800,
+            needLastMsg: true,
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
+    });
 };
 
+export { onMyInfo, getFriends, getUsers, getUser, updateFriend, getServerSessions };
 
 // 去重数组
 // const test = friends.reduce((acc, { account }) => {

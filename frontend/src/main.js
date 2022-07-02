@@ -18,12 +18,6 @@ import { myPlugin } from '@/components/user/user-card';
 const app = createApp(App);
 registerDirectives(app);
 
-if (typeof ElementPlusIconsVue !== 'undefined' && import.meta.env.MODE === 'development') {
-    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-        app.component(key, component);
-    }
-}
-
 app.use(myPlugin);
 
 app.use(router).use(store).mount('#app');

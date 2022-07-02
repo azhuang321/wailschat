@@ -1,9 +1,11 @@
 import registerDirectives from '@/core/directives'; // 自定义指令
 import UserCardDetail from './UserCardDetail.vue';
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
 
 let $inst;
 // 创建挂载实例
-const createMount = (options) => {
+const createMount = options => {
     const mountNode = document.createElement('div');
     document.body.appendChild(mountNode);
 
@@ -18,10 +20,10 @@ const createMount = (options) => {
         }
     });
     registerDirectives(app);
-    return app.mount(mountNode);
+    return app.use(ElementPlus).mount(mountNode);
 };
 
-function user (accountInfo, options = {}) {
+function user(accountInfo, options = {}) {
     $inst = createMount({
         ...options,
         account_info: accountInfo
@@ -29,15 +31,13 @@ function user (accountInfo, options = {}) {
     return $inst;
 }
 
-
 const myPlugin = {
-    install (app, options) {
+    install(app, options) {
         app.provide('ShowUserCardFunc', user);
     }
 };
 
 export { myPlugin };
-
 
 /**
 
