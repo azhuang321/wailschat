@@ -31,20 +31,20 @@ export default {
     },
     methods: {
         setTime() {
-            // this.time = beautifyTime(this.value);
-            //
-            // const time = new Date().getTime();
-            // const inTime = new Date(this.value.replace(/-/g, '/')).getTime();
-            //
-            // clearInterval(this.timeout);
-            //
-            // if (time - inTime > 35 * 60 * 1000) {
-            //   return;
-            // }
-            //
-            // this.timeout = setTimeout(() => {
-            //   this.setTime();
-            // }, 60 * 1000);
+            this.time = beautifyTime(this.value);
+
+            const time = new Date().getTime();
+            const inTime = new Date(this.value.replace(/-/g, '/')).getTime();
+
+            clearInterval(this.timeout);
+
+            if (time - inTime > 35 * 60 * 1000) {
+                return;
+            }
+
+            this.timeout = setTimeout(() => {
+                this.setTime();
+            }, 60 * 1000);
         }
     }
 };

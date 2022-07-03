@@ -108,12 +108,12 @@
                                     >
                                         <div class="avatar-box">
                                             <span v-show="!item.avatar">
-                                                <!--                                                {{-->
-                                                <!--                                                    (item.remark_name-->
-                                                <!--                                                        ? item.remark_name-->
-                                                <!--                                                        : item.name-->
-                                                <!--                                                    ).substr(0, 1)-->
-                                                <!--                                                }}-->
+                                                {{
+                                                    (item.alias ? item.alias : item.nick).substr(
+                                                        0,
+                                                        1
+                                                    )
+                                                }}
                                             </span>
                                             <img
                                                 v-show="item.avatar"
@@ -132,11 +132,7 @@
                                             <div class="title">
                                                 <div class="card-name">
                                                     <p class="nickname">
-                                                        {{
-                                                            item.remark_name
-                                                                ? item.remark_name
-                                                                : item.name
-                                                        }}
+                                                        {{ item.alias ? item.alias : item.nick }}
                                                     </p>
                                                     <div v-show="item.unread_num" class="larkc-tag">
                                                         {{ item.unread_num }}条未读
@@ -168,7 +164,13 @@
                                                     </div>
                                                 </div>
                                                 <div class="card-time">
-                                                    <u-time :value="item.updated_at" />
+                                                    <u-time
+                                                        :value="
+                                                            String(
+                                                                Math.ceil(item.updateTime / 1000)
+                                                            )
+                                                        "
+                                                    />
                                                 </div>
                                             </div>
                                             <div class="content">
@@ -198,7 +200,7 @@
                                                         <span v-else>[群消息]</span>
                                                     </template>
 
-                                                    <span>{{ item.msg_text }}</span>
+                                                    <span>{{ item?.lastMsg.text }}</span>
                                                 </template>
                                             </div>
                                         </div>

@@ -172,7 +172,6 @@ const useUserRemarkEffect = () => {
                 remarkData.text = obj.alias;
                 accountInfo.alias = obj.alias;
                 detail.alias = obj.alias;
-                console.log(obj);
             })
             .catch(err => {
                 ElNotification({

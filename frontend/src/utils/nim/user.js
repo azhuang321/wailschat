@@ -1,8 +1,9 @@
 import { getNimInstance, getFriends, getUsers, getServerSessions } from '@/utils/nim/index';
 
+const nim = await getNimInstance();
+
 // 获取好友列表
 export const getFriendList = async () => {
-    let nim = await getNimInstance();
     return new Promise((resolve, reject) => {
         getFriends()
             .then(async friends => {
@@ -27,14 +28,14 @@ export const getSessionList = async () => {
         getServerSessions()
             .then(res => {
                 if (res.sessionList.length > 0) {
-                    let sessionAccounts = res.sessionList.map(res => {
+                    res.sessionList.map(res => {
                         let account = res.id.split('p2p-')[1];
                         res.id = account;
                         return account;
                     });
                     sessionServerList = res.sessionList;
                     //todo 发现不存在的用户，需要去服务器同步
-                    return getUsers(sessionAccounts, false);
+                    return getFriendList();
                 }
             })
             .then(res => {

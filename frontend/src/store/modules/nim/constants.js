@@ -6,3 +6,6 @@ export const CONNECT_STATUS_ENUM = {
     connecting: 'connecting',
     connected: 'connected'
 };
+
+//会话列表
+export const SESSION_LIST = 'SESSION_LIST';
