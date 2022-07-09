@@ -30,5 +30,4 @@ const store = createStore({
     mutations
 });
 
-
 export default store;

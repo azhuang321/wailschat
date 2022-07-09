@@ -103,7 +103,7 @@
                                         :key="item.id"
                                         class="talk-item pointer"
                                         :class="{ active: index_name == item.index_name }"
-                                        @click="clickTab(item.index_name)"
+                                        @click="clickTab(item.account)"
                                         @contextmenu.prevent="talkItemsMenu(item, $event)"
                                     >
                                         <div class="avatar-box">
@@ -415,41 +415,40 @@ export default {
 
         // 切换聊天栏目
         clickTab(index_name) {
-            // const index = findTalkIndex(index_name);
-            //
-            // if (index == -1) {
-            //     return;
-            // }
+            console.log(index_name);
+            const index = findTalkIndex(index_name);
 
-            const item = this.talks[index];
-            const [talk_type, receiver_id] = index_name.split('_');
-            const nickname = item.remark_name ? item.remark_name : item.name;
+            if (index == -1) {
+                return;
+            }
+            // const item = this.talks[index];
+            // const [talk_type, receiver_id] = index_name.split('_');
+            // const nickname = item.remark_name ? item.remark_name : item.name;
 
-            this.params = {
-                talk_type,
-                receiver_id,
-                nickname,
-                is_robot: item.is_robot
-            };
+            // this.params = {
+            //     talk_type,
+            //     receiver_id,
+            //     nickname,
+            //     is_robot: item.is_robot
+            // };
 
             this.$store.commit('UPDATE_DIALOGUE_MESSAGE', {
-                talk_type,
-                receiver_id,
-                is_robot: item.is_robot
+                talk_type: 1,
+                receiver_id: '1',
+                is_robot: 0
             });
 
             this.$nextTick(() => {
                 if (index_name == this.index_name) {
-                    this.$store.commit('UPDATE_TALK_ITEM', {
-                        index_name,
-                        unread_num: 0
-                    });
-
+                    // this.$store.commit('UPDATE_TALK_ITEM', {
+                    //     index_name,
+                    //     unread_num: 0
+                    // });
                     // 清空消息未读数(后期改成WebSocket发送消息)
-                    ServeClearTalkUnreadNum({
-                        talk_type: parseInt(talk_type),
-                        receiver_id: parseInt(receiver_id)
-                    });
+                    // ServeClearTalkUnreadNum({
+                    //     talk_type: parseInt(talk_type),
+                    //     receiver_id: parseInt(receiver_id)
+                    // });
                 }
             });
         },
@@ -695,15 +694,21 @@ export default {
 <script setup>
 import { getSessionList } from '@/utils/nim/user';
 import { ElNotification } from 'element-plus';
+import { useStore } from 'vuex';
+import { SESSION_LIST } from '@/store/modules/nim/constants';
+
+const store = useStore();
+const sessionList = computed(() => store.state.nim.sessionList);
 
 const useSessionListEffect = () => {
-    const sessionList = reactive([]);
     getSessionList()
         .then(res => {
-            sessionList.length = 0;
-            sessionList.push(...res);
+            store.dispatch({
+                type: SESSION_LIST,
+                session: res
+            });
         })
-        .catch(res => {
+        .catch(err => {
             ElNotification({
                 type: 'error',
                 message: '获取对话列表失败'
@@ -714,7 +719,7 @@ const useSessionListEffect = () => {
     };
 };
 
-const { sessionList } = useSessionListEffect();
+useSessionListEffect();
 </script>
 <style lang="scss" scoped>
 :deep(.el-scrollbar__wrap) {

@@ -30,10 +30,16 @@ watch(isConnect, value => {
         if (typeof internalInstance.appContext.config.globalProperties.connectNfn !== 'undefined') {
             internalInstance.appContext.config.globalProperties.connectNfn.close();
         }
-        store.commit(CONNECT_STATUS, CONNECT_STATUS_ENUM.connected);
+        store.dispatch({
+            type: CONNECT_STATUS,
+            status: CONNECT_STATUS_ENUM.connected
+        });
     } else {
         internalInstance.appContext.config.globalProperties.connectNfn = notifyFunc();
-        store.commit(CONNECT_STATUS, CONNECT_STATUS_ENUM.disconnect);
+        store.dispatch({
+            type: CONNECT_STATUS,
+            status: CONNECT_STATUS_ENUM.disconnect
+        });
     }
 });
 </script>

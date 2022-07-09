@@ -2,10 +2,20 @@ import * as c from './constants';
 
 export const actions = {
     // 连接状态
-    [c.CONNECT_STATUS]({ commit }) {
-        commit(c.CONNECT_STATUS);
+    [c.CONNECT_STATUS]({ commit }, payload) {
+        commit(payload);
     },
-    [c.SESSION_LIST]({ commit }) {
-        commit(c.SESSION_LIST);
+    async [c.SESSION_LIST]({ state, commit }, payload) {
+        let options = {
+            keyPath: 'account',
+            sortPath: 'updateTime',
+            desc: true
+        };
+        payload.session = NIM.util.mergeObjArray(
+            toRaw(state.sessionList),
+            payload.session,
+            options
+        );
+        commit(payload);
     }
 };

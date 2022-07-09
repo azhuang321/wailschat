@@ -1,10 +1,11 @@
 import * as c from './constants';
 
 export const mutations = {
-    [c.CONNECT_STATUS](state, status) {
-        state.connectStatus = status;
+    [c.CONNECT_STATUS](state, payload) {
+        state.connectStatus = payload.status;
     },
-    [c.SESSION_LIST](state, sessionList) {
-        state.sessionList = sessionList;
+    [c.SESSION_LIST](state, payload) {
+        state.sessionList.length = 0;
+        state.sessionList.push(...payload.session);
     }
 };
