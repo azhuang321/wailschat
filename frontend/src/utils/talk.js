@@ -11,7 +11,6 @@ const KEY_INDEX_NAME = 'send_message_index_name';
  * @param {String} index_name
  */
 export function findTalkIndex(index_name) {
-    console.log(store);
     return store.state.nim.sessionList.findIndex(item => item.account == index_name);
 }
 

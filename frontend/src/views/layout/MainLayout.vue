@@ -1,62 +1,35 @@
 <script setup>
-const { ChatDotRound, UserFilled, Tools } = useIconEffect();
-const internalInstance = getCurrentInstance();
-
 const usercard = ref(null);
 
-const { CONNECT_STATUS_ENUM } = useInitEffect();
-
 const store = useStore();
+const { ChatDotRound, UserFilled, Tools } = useIconEffect();
 
 const socketStatus = computed(() => store.getters.connectStatus);
 
-const notifyFunc = () => {
-    if (socketStatus.value === CONNECT_STATUS_ENUM.connected) {
-        return;
-    }
-    if (typeof internalInstance.appContext.config.globalProperties.connectNfn !== 'undefined') {
-        internalInstance.appContext.config.globalProperties.connectNfn.close();
-    }
-    return ElNotification.error({
-        message: '断开连接，正在尝试重新连接',
-        duration: 0,
-        showClose: false
-    });
-};
-internalInstance.appContext.config.globalProperties.connectNfn = notifyFunc();
+const { CONNECT_STATUS_ENUM, notifyFunc, watchFunc } = useInitEffect(socketStatus);
 
-watch(isConnect, value => {
-    if (value === true) {
-        if (typeof internalInstance.appContext.config.globalProperties.connectNfn !== 'undefined') {
-            internalInstance.appContext.config.globalProperties.connectNfn.close();
-        }
-        store.dispatch({
-            type: CONNECT_STATUS,
-            status: CONNECT_STATUS_ENUM.connected
-        });
-    } else {
-        internalInstance.appContext.config.globalProperties.connectNfn = notifyFunc();
-        store.dispatch({
-            type: CONNECT_STATUS,
-            status: CONNECT_STATUS_ENUM.disconnect
-        });
-    }
+store.dispatch({
+    type: CONNECT_NOTIFICATION,
+    notification: notifyFunc()
 });
+
+watchEffect(watchFunc);
 </script>
 
 <script>
 import { mapState, mapGetters, useStore } from 'vuex';
 import AccountCard from '@/components/user/AccountCard.vue';
-// import RewardModule from '@/components/layout/RewardModule.vue';
-// import AbsModule from '@/components/layout/AbsModule.vue';
 import { ServeFindFriendApplyNum } from '@/api/contacts';
-import { CONNECT_STATUS, CONNECT_STATUS_ENUM } from '@/store/modules/nim/constants';
+import {
+    CONNECT_STATUS,
+    CONNECT_STATUS_ENUM,
+    CONNECT_NOTIFICATION
+} from '@/store/modules/nim/constants';
 import { isConnect } from '@/utils/nim/callback';
-
-import 'element-plus/theme-chalk/el-loading.css';
 
 import { ChatDotRound, UserFilled, Tools } from '@element-plus/icons-vue';
 
+//使用图标
 const useIconEffect = () => {
     return {
         ChatDotRound: markRaw(ChatDotRound),
@@ -64,9 +37,51 @@ const useIconEffect = () => {
         Tools: markRaw(Tools)
     };
 };
-const useInitEffect = () => {
+
+// socket 状态监听
+const useInitEffect = socketStatus => {
+    const store = useStore();
+
+    const notifyFunc = () => {
+        if (socketStatus.value === CONNECT_STATUS_ENUM.connected) {
+            return;
+        }
+        if (typeof store.state.nim.connectNotification === 'object') {
+            return store.state.nim.connectNotification;
+        }
+
+        return ElNotification.error({
+            message: '断开连接，正在尝试重新连接',
+            duration: 0,
+            showClose: false
+        });
+    };
+
+    const watchFunc = () => {
+        if (isConnect.value === true) {
+            if (typeof store.state.nim.connectNotification === 'object') {
+                store.state.nim.connectNotification.close();
+            }
+            store.dispatch({
+                type: CONNECT_STATUS,
+                status: CONNECT_STATUS_ENUM.connected
+            });
+        } else {
+            store.dispatch({
+                type: CONNECT_NOTIFICATION,
+                notification: notifyFunc()
+            });
+            store.dispatch({
+                type: CONNECT_STATUS,
+                status: CONNECT_STATUS_ENUM.disconnect
+            });
+        }
+    };
+
     return {
-        CONNECT_STATUS_ENUM
+        CONNECT_STATUS_ENUM,
+        notifyFunc,
+        watchFunc
     };
 };
 

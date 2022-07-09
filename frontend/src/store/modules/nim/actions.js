@@ -5,6 +5,7 @@ export const actions = {
     [c.CONNECT_STATUS]({ commit }, payload) {
         commit(payload);
     },
+    //会话列表
     async [c.SESSION_LIST]({ state, commit }, payload) {
         let options = {
             keyPath: 'account',
@@ -16,6 +17,10 @@ export const actions = {
             payload.session,
             options
         );
+        commit(payload);
+    },
+    //连接状态通知
+    [c.CONNECT_NOTIFICATION]({ commit }, payload) {
         commit(payload);
     }
 };

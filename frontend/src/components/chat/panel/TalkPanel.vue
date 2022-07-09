@@ -36,16 +36,16 @@
                         <div v-for="(item, idx) in records" :key="item.id">
                             <!-- 群消息 -->
                             <div v-if="item.msg_type == 9" class="message-box">
-                                <invite-message :invite="item.invite" @cat="catFriendDetail" />
+                                <!--                                <invite-message :invite="item.invite" @cat="catFriendDetail" />-->
                             </div>
 
                             <!-- 撤回消息 -->
                             <div v-else-if="item.is_revoke == 1" class="message-box">
-                                <revoke-message :item="item" />
+                                <!--                                <revoke-message :item="item" />-->
                             </div>
 
                             <div v-else-if="item.msg_type == 0" class="message-box">
-                                <system-text-message :content="item.content" />
+                                <!--                                <system-text-message :content="item.content" />-->
                             </div>
 
                             <!-- 其它对话消息 -->
@@ -96,37 +96,37 @@
                                         </span>
 
                                         <!-- 文本消息 -->
-                                        <text-message
-                                            v-if="item.msg_type == 1"
-                                            :content="item.content"
-                                            :float="item.float"
-                                            :full-width="false"
-                                            :arrow="true"
-                                            @contextmenu.native="onCopy(idx, item, $event)"
-                                        />
+                                        <!--                                        <text-message-->
+                                        <!--                                            v-if="item.msg_type == 1"-->
+                                        <!--                                            :content="item.content"-->
+                                        <!--                                            :float="item.float"-->
+                                        <!--                                            :full-width="false"-->
+                                        <!--                                            :arrow="true"-->
+                                        <!--                                            @contextmenu.native="onCopy(idx, item, $event)"-->
+                                        <!--                                        />-->
 
-                                        <!-- 图片消息 -->
+                                        <!--                                        &lt;!&ndash; 图片消息 &ndash;&gt;
                                         <image-message
                                             v-else-if="item.msg_type == 2 && item.file.type == 1"
                                             :src="item.file.url"
                                             @contextmenu.native="onCopy(idx, item, $event)"
                                         />
 
-                                        <!-- 音频文件预留 -->
+                                        &lt;!&ndash; 音频文件预留 &ndash;&gt;
                                         <audio-message
                                             v-else-if="item.msg_type == 2 && item.file.type == 2"
                                             :src="item.file.url"
                                             @contextmenu.native="onCopy(idx, item, $event)"
                                         />
 
-                                        <!-- 视频文件预留 -->
+                                        &lt;!&ndash; 视频文件预留 &ndash;&gt;
                                         <video-message
                                             v-else-if="item.msg_type == 2 && item.file.type == 3"
                                             :src="item.file.url"
                                             @contextmenu.native="onCopy(idx, item, $event)"
                                         />
 
-                                        <!-- 文件消息 -->
+                                        &lt;!&ndash; 文件消息 &ndash;&gt;
                                         <file-message
                                             v-else-if="item.msg_type == 2 && item.file.type == 4"
                                             :file="item.file"
@@ -134,7 +134,7 @@
                                             @contextmenu.native="onCopy(idx, item, $event)"
                                         />
 
-                                        <!-- 会话记录消息 -->
+                                        &lt;!&ndash; 会话记录消息 &ndash;&gt;
                                         <forward-message
                                             v-else-if="item.msg_type == 3"
                                             :forward="item.forward"
@@ -142,7 +142,7 @@
                                             @contextmenu.native="onCopy(idx, item, $event)"
                                         />
 
-                                        <!-- 代码块消息 -->
+                                        &lt;!&ndash; 代码块消息 &ndash;&gt;
                                         <code-message
                                             v-else-if="item.msg_type == 4"
                                             :code="item.code_block.code"
@@ -151,30 +151,30 @@
                                             @contextmenu.native="onCopy(idx, item, $event)"
                                         />
 
-                                        <!-- 投票消息 -->
+                                        &lt;!&ndash; 投票消息 &ndash;&gt;
                                         <vote-message
                                             v-else-if="item.msg_type == 5"
                                             :record_id="item.id"
                                             :vote="item.vote"
                                         />
 
-                                        <!-- 登录消息 -->
+                                        &lt;!&ndash; 登录消息 &ndash;&gt;
                                         <login-message
                                             v-else-if="item.msg_type == 8"
                                             :detail="item.login"
                                         />
 
-                                        <!-- 位置消息 -->
+                                        &lt;!&ndash; 位置消息 &ndash;&gt;
                                         <location-message
                                             v-else-if="item.msg_type == 10"
                                             :lat="item.location.latitude"
                                             :lng="item.location.longitude"
                                         />
 
-                                        <!-- 未知消息 -->
+                                        &lt;!&ndash; 未知消息 &ndash;&gt;
                                         <div v-else class="unknown-msg">
                                             未知消息类型[{{ item.msg_type }}]
-                                        </div>
+                                        </div>-->
 
                                         <!-- 消息引用(预留) -->
                                         <!-- <reply-message /> -->
@@ -183,16 +183,16 @@
                             </div>
 
                             <!-- 消息时间 -->
-                            <div
+                            <!--                            <div
                                 v-show="compareTime(idx, item.created_at)"
                                 class="datetime no-select"
                                 v-text="sendTime(item.created_at)"
-                            ></div>
+                            ></div>-->
                         </div>
                     </div>
 
                     <!-- 置底按钮 -->
-                    <transition name="el-fade-in-linear">
+                    <!--                    <transition name="el-fade-in-linear">
                         <div
                             v-show="tipsBoard"
                             class="tips-board pointer"
@@ -201,10 +201,10 @@
                             <SvgMentionDown class="svg" />
                             <span>回到底部</span>
                         </div>
-                    </transition>
+                    </transition>-->
 
                     <!-- 新消息气泡 -->
-                    <div
+                    <!--                    <div
                         v-show="tipsBoard && unreadMessage.num"
                         class="talk-bubble pointer no-select"
                         @click="talkPanelScrollBottom"
@@ -215,18 +215,18 @@
                             &nbsp;#{{ unreadMessage.nickname }}#
                             {{ unreadMessage.content }}
                         </span>
-                    </div>
+                    </div>-->
                 </el-main>
 
                 <!-- 页脚信息 -->
-                <el-footer class="footer-box" height="160">
+                <!--                <el-footer class="footer-box" height="160">
                     <template v-if="multiSelect.isOpen === false">
                         <MeEditor @send="submitSendMesage" @keyboard-event="onKeyboardEvent" />
                     </template>
                     <template v-else>
                         <PanelToolbar v-model="multiSelect.items.length" @event="handleMultiMode" />
                     </template>
-                </el-footer>
+                </el-footer>-->
             </el-container>
 
             <!-- 群设置侧边栏 -->

@@ -9,3 +9,6 @@ export const CONNECT_STATUS_ENUM = {
 
 //会话列表
 export const SESSION_LIST = 'SESSION_LIST';
+
+//全局断线通知
+export const CONNECT_NOTIFICATION = 'CONNECT_NOTIFICATION';
