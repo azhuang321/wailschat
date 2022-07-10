@@ -7192,6 +7192,11 @@ split-string@^3.0.1, split-string@^3.0.2:
   dependencies:
     extend-shallow "^3.0.0"
 
+splitpanes@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/splitpanes/-/splitpanes-3.1.0.tgz#74876be93506a6884b53c3dba7cf94a446b573c9"
+  integrity sha512-O7yaiAJiqjnBW7nU96RwL5L0yu3F5zSjOwkTxrK4Ot63offVBt9KwORcydLsTkwVcQqwT3FTuKB77m5UGXKvcw==
+
 ssri@^8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/ssri/-/ssri-8.0.1.tgz#638e4e439e2ffbd2cd289776d5ca457c4f51a2af"

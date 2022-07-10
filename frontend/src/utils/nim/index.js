@@ -1,7 +1,7 @@
 import config from '@/config/config';
 import { onConnect, onError, onWillReconnect, onDisConnect, onMyInfo } from './callback';
 
-await import(`../../nim_sdk/${config.sdk}.js`);
+import(`../../nim_sdk/${config.sdk}.js`);
 let nim = null;
 
 /**
