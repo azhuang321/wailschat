@@ -502,9 +502,9 @@ export default {
         <MainLayout #container :idx="0">
             <el-container class="full-height">
                 <splitpanes class="default-theme" >
-                    <pane max-size="20">
+                    <pane max-size="20" min-size="10">
                         <!-- 左侧侧边栏 -->
-                        <el-aside width="320px" class="aside-box">
+                        <el-aside width="100%" class="aside-box">
                             <el-container class="full-height" direction="vertical">
                                 <!-- 搜索栏 -->
                                 <el-header height="60px" class="header">
@@ -746,6 +746,10 @@ export default {
 <style lang="scss" scoped>
 :deep(.el-scrollbar__wrap) {
     overflow-x: hidden;
+}
+
+.splitpanes__pane{
+    background-color: white;
 }
 
 .aside-box {
