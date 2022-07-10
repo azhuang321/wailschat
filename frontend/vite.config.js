@@ -83,7 +83,10 @@ export default defineConfig(({ mode }) => {
     return {
         base: '/',
         resolve: {
-            alias: [{ find: '@', replacement: pathSrc }]
+            alias: [
+                { find: '@', replacement: pathSrc },
+                { find: 'vue', replacement: 'vue/dist/vue.esm-bundler.js' }
+            ]
         },
         css: {
             preprocessorOptions: {

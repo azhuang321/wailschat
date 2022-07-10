@@ -204,7 +204,7 @@ export default {
     methods: {
         // 读取对话编辑草稿信息
         getDraftText(index_name) {
-            return findTalk(index_name).draft_text || '';
+            // return findTalk(index_name).draft_text || '';
         },
 
         // 复制粘贴图片回调方法
