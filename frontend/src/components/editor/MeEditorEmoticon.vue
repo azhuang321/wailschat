@@ -117,9 +117,9 @@ export default {
         };
     },
     computed: {
-        // ...mapState({
-        //     emojiItem: state => state.emoticon.items
-        // }),
+        ...mapState({
+            emojiItem: state => state.emoticon.items
+        }),
         showItems() {
             const start = (this.page - 1) * this.pageSize;
             const end = start + this.pageSize;

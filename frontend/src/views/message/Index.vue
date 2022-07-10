@@ -3,34 +3,69 @@ import { getSessionList } from '@/utils/nim/user';
 import { ElNotification } from 'element-plus';
 import { useStore } from 'vuex';
 import { SESSION_LIST } from '@/store/modules/nim/constants';
+import { findTalkIndex } from '@/utils/talk';
 
 const store = useStore();
 const sessionList = computed(() => store.state.nim.sessionList);
+let index_name = 'azhuang'
 
-const useSessionListEffect = () => {
-    getSessionList()
-        .then(res => {
-            store.dispatch({
-                type: SESSION_LIST,
-                session: res
-            });
-        })
-        .catch(err => {
-            ElNotification({
-                type: 'error',
-                message: '获取对话列表失败'
-            });
+const useClickSessionEffect = () => {
+    const store = useStore();
+
+    // 对话面板的传递参数
+    const params = reactive({
+        talk_type: 0,
+        receiver_id: 0,
+        nickname: ''
+    })
+    // 切换聊天栏目
+    const clickSession = (account) => {
+        const index = findTalkIndex(account);
+
+        if (index == -1) {
+            //todo 判断
+        }
+
+        index_name = account
+
+        params.talk_type = 1;
+        params.receiver_id = 1;
+        params.nickname = account;
+        params.is_robot = 0;
+
+        store.commit('UPDATE_DIALOGUE_MESSAGE', {
+            talk_type: 1,
+            receiver_id: account,
+            is_robot: 0
         });
-    return {
-        sessionList
-    };
-};
 
-useSessionListEffect();
+        nextTick(() => {
+            // if (index_name == this.index_name) {
+            //     store.commit('UPDATE_TALK_ITEM', {
+            //         index_name,
+            //         unread_num: 0
+            //     });
+                // 清空消息未读数(后期改成WebSocket发送消息)
+                // ServeClearTalkUnreadNum({
+                //     talk_type: parseInt(talk_type),
+                //     receiver_id: parseInt(receiver_id)
+                // });
+            // }
+        });
+    }
+
+    return {
+        params, clickSession
+    }
+}
+
+const {params,clickSession} = useClickSessionEffect()
+
+useSessionListEffect()
 </script>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, useStore } from 'vuex';
 import MainLayout from '@/views/layout/MainLayout.vue';
 import WelcomeModule from '@/components/layout/WelcomeModule.vue';
 import GroupLaunch from '@/components/group/GroupLaunch.vue';
@@ -49,8 +84,29 @@ import { beautifyTime } from '@/utils/functions';
 import { findTalkIndex, getCacheIndexName } from '@/utils/talk';
 
 import { Plus, Search } from '@element-plus/icons-vue';
+import { getSessionList } from '@/utils/nim/user';
+import { SESSION_LIST } from '@/store/modules/nim/constants';
+import { ElNotification } from 'element-plus';
 
 const title = document.title;
+
+const useSessionListEffect = () => {
+    const store = useStore();
+    getSessionList()
+        .then(res => {
+            store.dispatch({
+                type: SESSION_LIST,
+                session: res
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            ElNotification({
+                type: 'error',
+                message: '获取对话列表失败'
+            });
+        });
+};
 
 export default {
     name: 'MessagePage',
@@ -79,12 +135,7 @@ export default {
             subHeaderShadow: false,
             launchGroupShow: false,
 
-            // 对话面板的传递参数
-            params: {
-                talk_type: 0,
-                receiver_id: 0,
-                nickname: ''
-            },
+
 
             // 查询关键词
             input: '',
@@ -94,7 +145,6 @@ export default {
 
             // 消息未读数计时器
             interval: null,
-            index_name: 'azhuang',
             talkItems: [{ index_name: '123', remark_name: '123' }]
         };
     },
@@ -202,43 +252,7 @@ export default {
             this.$store.dispatch('LOAD_TALK_ITEMS');
         },
 
-        // 切换聊天栏目
-        clickTab(index_name) {
-            const index = findTalkIndex(index_name);
 
-            if (index == -1) {
-            }
-            // const item = this.talks[index];
-            // const [talk_type, receiver_id] = index_name.split('_');
-            // const nickname = item.remark_name ? item.remark_name : item.name;
-
-            this.params = {
-                talk_type: 1,
-                receiver_id: 1,
-                nickname: 'azhuang',
-                is_robot: 0
-            };
-
-            this.$store.commit('UPDATE_DIALOGUE_MESSAGE', {
-                talk_type: 1,
-                receiver_id: '1',
-                is_robot: 0
-            });
-
-            this.$nextTick(() => {
-                if (index_name == this.index_name) {
-                    this.$store.commit('UPDATE_TALK_ITEM', {
-                        index_name,
-                        unread_num: 0
-                    });
-                    // 清空消息未读数(后期改成WebSocket发送消息)
-                    // ServeClearTalkUnreadNum({
-                    //     talk_type: parseInt(talk_type),
-                    //     receiver_id: parseInt(receiver_id)
-                    // });
-                }
-            });
-        },
 
         // 修改当前对话
         changeTalk(index_name) {
@@ -583,8 +597,8 @@ export default {
                                         v-for="item in sessionList"
                                         :key="item.id"
                                         class="talk-item pointer"
-                                        :class="{ active: index_name == item.index_name }"
-                                        @click="clickTab(item.account)"
+                                        :class="{ active: index_name == item.account }"
+                                        @click="clickSession(item.account)"
                                         @contextmenu.prevent="talkItemsMenu(item, $event)"
                                     >
                                         <div class="avatar-box">

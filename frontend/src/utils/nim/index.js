@@ -121,3 +121,30 @@ export const getServerSessions = async () => {
         });
     });
 };
+
+// 发送消息 todo 完善发送设置
+export const sendText = async content => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        let msg = nim.sendText({
+            scene: 'p2p',
+            to: 'azhuang1',
+            text: content,
+            done: (error, msg) => {
+                console.log(
+                    '发送' +
+                        msg.scene +
+                        ' ' +
+                        msg.type +
+                        '消息' +
+                        (!error ? '成功' : '失败') +
+                        ', id=' +
+                        msg.idClient,
+                    error,
+                    msg
+                );
+            }
+        });
+        console.log('正在发送p2p text消息, id=' + msg.idClient);
+    });
+};

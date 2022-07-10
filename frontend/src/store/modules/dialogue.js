@@ -17,7 +17,6 @@ export default {
     mutations: {
         // 更新对话
         UPDATE_DIALOGUE_MESSAGE(state, resource) {
-            console.log(resource);
             state.records = [];
             state.talk_type = parseInt(resource.talk_type);
             state.receiver_id = parseInt(resource.receiver_id);

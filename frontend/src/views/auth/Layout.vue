@@ -8,7 +8,7 @@
                 </div>
             </el-header>
             <el-main>
-                <router-view/>
+                <router-view />
             </el-main>
             <el-footer>
                 <div class="copyright" v-html="$store.state.copyright"></div>
@@ -23,33 +23,29 @@
         </div>
     </div>
 </template>
-<script>
 
-</script>
 <style lang="scss" scoped>
-
 $bg-color: #f6f8fb;
 $theme-color: #2196f3;
 $lw-cl: #b1a0a0;
 
-
-.common-layout{
+.common-layout {
     background-color: $bg-color;
     width: 100%;
     height: 100%;
 
-    .el-container{
+    .el-container {
         width: 100%;
         height: 100%;
 
-        .el-header{
+        .el-header {
             flex: 1;
-            .logo-name{
-                font-size: .34rem;
+            .logo-name {
+                font-size: 0.34rem;
                 font-family: Times New Roman, Georgia, Serif, serif;
                 color: $theme-color;
-                margin-left: .2rem;
-                margin-top: .2rem;
+                margin-left: 0.2rem;
+                margin-top: 0.2rem;
             }
         }
         .el-main {
@@ -62,12 +58,12 @@ $lw-cl: #b1a0a0;
             justify-content: center;
             align-items: center;
         }
-        .el-footer{
+        .el-footer {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            .copyright{
+            .copyright {
                 color: $lw-cl;
             }
         }
@@ -75,12 +71,12 @@ $lw-cl: #b1a0a0;
 }
 
 @media screen and (max-height: 500px) {
-    .el-header,.copyright,.el-footer{
+    .el-header,
+    .copyright,
+    .el-footer {
         display: none !important;
-
     }
 }
-
 
 .fly-box {
     .fly {
@@ -96,9 +92,9 @@ $lw-cl: #b1a0a0;
         height: 100px;
         border-radius: 50%;
         background: linear-gradient(
-                to right,
-                rgba(100, 84, 239, 0.07) 0%,
-                rgba(48, 33, 236, 0.04) 100%
+            to right,
+            rgba(100, 84, 239, 0.07) 0%,
+            rgba(48, 33, 236, 0.04) 100%
         );
         animation: move 2.5s linear infinite;
     }
@@ -110,9 +106,9 @@ $lw-cl: #b1a0a0;
         height: 150px;
         border-radius: 50%;
         background: linear-gradient(
-                to right,
-                rgba(100, 84, 239, 0.08) 0%,
-                rgba(48, 33, 236, 0.04) 100%
+            to right,
+            rgba(100, 84, 239, 0.08) 0%,
+            rgba(48, 33, 236, 0.04) 100%
         );
         animation: move 3s linear infinite;
     }
@@ -124,9 +120,9 @@ $lw-cl: #b1a0a0;
         height: 145px;
         border-radius: 50%;
         background: linear-gradient(
-                to right,
-                rgba(100, 84, 239, 0.1) 0%,
-                rgba(48, 33, 236, 0.04) 100%
+            to right,
+            rgba(100, 84, 239, 0.1) 0%,
+            rgba(48, 33, 236, 0.04) 100%
         );
         animation: move 2.5s linear infinite;
     }
@@ -138,9 +134,9 @@ $lw-cl: #b1a0a0;
         height: 160px;
         border-radius: 50%;
         background: linear-gradient(
-                to right,
-                rgba(100, 84, 239, 0.02) 0%,
-                rgba(48, 33, 236, 0.04) 100%
+            to right,
+            rgba(100, 84, 239, 0.02) 0%,
+            rgba(48, 33, 236, 0.04) 100%
         );
         animation: move 3.5s linear infinite;
     }

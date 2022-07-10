@@ -1,60 +1,18 @@
-<template>
-    <div class="login-box">
-        <div class="header">快捷登录</div>
-        <div class="main">
-            <el-form ref="ruleForms" :model="form" :rules="rules">
-                <el-form-item prop="username">
-                    <el-input
-                        v-model.trim="form.username"
-                        placeholder="手机号"
-                        class="cuborder-radius"
-                        maxlength="11"
-                        autocomplete="off"
-                        @keyup.enter="handleSubmit(ruleForms)"
-                    />
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input
-                        v-model.trim="form.password"
-                        type="password"
-                        placeholder="密码"
-                        class="cuborder-radius"
-                        autocomplete="new-password"
-                        @keyup.enter="handleSubmit(ruleForms)"
-                    />
-                </el-form-item>
-                <el-form-item>
-                    <el-button
-                        type="primary"
-                        class="submit-btn"
-                        :loading="loginLoading"
-                        round
-                        @click="handleSubmit(ruleForms)"
-                    >立即登录
-                    </el-button>
-                </el-form-item>
-                <el-form-item>
-                    <div class="links">
-                        <el-link type="primary" :underline="false" @click="toLink('/auth/forget')">
-                            找回密码
-                        </el-link>
-                        <el-link type="primary" :underline="false" @click="toLink('/auth/login')">
-                            已有账号，立即登录?
-                        </el-link>
-                    </div>
-                </el-form-item>
+<script setup>
+router = useRouter();
+store = useStore();
 
-                <el-divider>
-                    <span><i-ep-Iphone />预览账号</span>
-                </el-divider>
-                <el-form-item class="preview-account">
-                    <p>预览账号:18798272054 / 密码: admin123</p>
-                    <p>预览账号:18798272055 / 密码: admin123</p>
-                </el-form-item>
-            </el-form>
-        </div>
-    </div>
-</template>
+const { rules, form, ruleForms, handleSubmit } = useFormDataEffect();
+const { loginLoading } = useLoginEffect;
+
+setTimeout(() => {
+    ElNotification({
+        type: 'success',
+        title: 'Title',
+        message: h('i', { style: 'color: teal' }, 'This is a reminder')
+    });
+}, 1000);
+</script>
 
 <script>
 import { setToken } from '@/utils/auth';
@@ -62,7 +20,6 @@ import { ServeLogin } from '@/api/auth';
 
 import { getNimInstance } from '@/utils/nim';
 import { isConnect } from '@/utils/nim/callback';
-// import { useStore } from 'vuex';
 
 let router = null;
 let store = null;
@@ -145,21 +102,63 @@ export default {
 };
 </script>
 
-<script setup>
-router = useRouter();
-store = useStore();
+<template>
+    <div class="login-box">
+        <div class="header">快捷登录</div>
+        <div class="main">
+            <el-form ref="ruleForms" :model="form" :rules="rules">
+                <el-form-item prop="username">
+                    <el-input
+                        v-model.trim="form.username"
+                        placeholder="手机号"
+                        class="cuborder-radius"
+                        maxlength="11"
+                        autocomplete="off"
+                        @keyup.enter="handleSubmit(ruleForms)"
+                    />
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input
+                        v-model.trim="form.password"
+                        type="password"
+                        placeholder="密码"
+                        class="cuborder-radius"
+                        autocomplete="new-password"
+                        @keyup.enter="handleSubmit(ruleForms)"
+                    />
+                </el-form-item>
+                <el-form-item>
+                    <el-button
+                        type="primary"
+                        class="submit-btn"
+                        :loading="loginLoading"
+                        round
+                        @click="handleSubmit(ruleForms)"
+                    >立即登录
+                    </el-button>
+                </el-form-item>
+                <el-form-item>
+                    <div class="links">
+                        <el-link type="primary" :underline="false" @click="toLink('/auth/forget')">
+                            找回密码
+                        </el-link>
+                        <el-link type="primary" :underline="false" @click="toLink('/auth/login')">
+                            已有账号，立即登录?
+                        </el-link>
+                    </div>
+                </el-form-item>
 
-const { rules, form, ruleForms, handleSubmit } = useFormDataEffect();
-const { loginLoading } = useLoginEffect;
-
-setTimeout(() => {
-    ElNotification({
-        type: 'success',
-        title: 'Title',
-        message: h('i', { style: 'color: teal' }, 'This is a reminder')
-    });
-}, 1000);
-</script>
+                <el-divider>
+                    <span><i-ep-Iphone />预览账号</span>
+                </el-divider>
+                <el-form-item class="preview-account">
+                    <p>预览账号:18798272054 / 密码: admin123</p>
+                    <p>预览账号:18798272055 / 密码: admin123</p>
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
+</template>
 
 <style lang="scss" scoped>
 $hl-bg-cl: white;

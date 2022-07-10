@@ -26,7 +26,7 @@ export default {
                 title: '找回密码？',
                 needLogin: false
             },
-            component: () => import('@/views/auth/forget.vue')
+            component: () => import('@/views/auth/Forget.vue')
         }
     ]
 };
