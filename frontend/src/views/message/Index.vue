@@ -9,6 +9,7 @@ const store = useStore();
 const sessionList = computed(() => store.state.nim.sessionList);
 let index_name = 'azhuang'
 
+// 点击回话列表，渲染会话
 const useClickSessionEffect = () => {
     const store = useStore();
 
@@ -88,12 +89,13 @@ import { getSessionList } from '@/utils/nim/user';
 import { SESSION_LIST } from '@/store/modules/nim/constants';
 import { ElNotification } from 'element-plus';
 
-// https://antoniandre.github.io/splitpanes/
+// 文档：https://antoniandre.github.io/splitpanes/
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
 const title = document.title;
 
+//获取对话列表
 const useSessionListEffect = () => {
     const store = useStore();
     getSessionList()
@@ -595,7 +597,7 @@ export default {
                                             <span class="title">消息记录 ({{ talkNum }})</span>
                                         </p>
 
-                                        <!-- <p v-show="loadStatus == 4" style="text-align:center;">数据加载失败，请点击重试！</p> -->
+                                         <p v-show="loadStatus == 4" style="text-align:center;">数据加载失败，请点击重试！</p>
 
                                         <!-- 对话列表 -->
                                         <template v-if="loadStatus != 3">
@@ -748,8 +750,8 @@ export default {
     overflow-x: hidden;
 }
 
-.splitpanes__pane{
-    background-color: white;
+.splitpanes.default-theme .splitpanes__pane {
+     background-color: white;
 }
 
 .aside-box {
