@@ -62,7 +62,6 @@ const props = defineProps({
         default: false
     }
 });
-console.log(props);
 
 const params = computed(() => props.data);
 </script>

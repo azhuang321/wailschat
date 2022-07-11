@@ -179,7 +179,8 @@ export function parseTime(time, cFormat) {
             time = time * 1000;
         }
 
-        date = new Date(time.replace(/-/g, '/'));
+        //todo bug
+        date = new Date(String(time).replace(/-/g, '/'));
     }
 
     const formatObj = {

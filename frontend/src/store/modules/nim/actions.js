@@ -22,5 +22,14 @@ export const actions = {
     //连接状态通知
     [c.CONNECT_NOTIFICATION]({ commit }, payload) {
         commit(payload);
+    },
+    // 当前会话列表
+    [c.CURRENT_SESSION_LIST]({ state, commit }, payload) {
+        for (let i = 0; i < state.currentSessionList.length; i++) {
+            if (state.currentSessionList[i].receiver_id === payload.currentSession.receiver_id) {
+                return;
+            }
+        }
+        commit(payload);
     }
 };

@@ -81,7 +81,7 @@
                                         class="time"
                                     >
                                         <i class="el-icon-time"></i>
-                                        {{ parseTime(item.created_at, '{m}月{d}日 {h}:{i}') }}
+                                        {{ parseTime(item.time, '{m}月{d}日 {h}:{i}') }}
                                     </span>
                                 </div>
 
@@ -90,19 +90,19 @@
                                         v-show="params.talk_type == 2 && item.float == 'left'"
                                         class="nickname"
                                     >
-                                        {{ item.friend_remarks || item.nickname }} |
-                                        {{ parseTime(item.created_at, '{m}月{d}日 {h}:{i}') }}
+                                        {{ item.from || item.nickname }} |
+                                        {{ parseTime(item.time, '{m}月{d}日 {h}:{i}') }}
                                     </span>
 
                                     <!-- 文本消息 -->
-                                    <!--                                        <text-message-->
-                                    <!--                                            v-if="item.msg_type == 1"-->
-                                    <!--                                            :content="item.content"-->
-                                    <!--                                            :float="item.float"-->
-                                    <!--                                            :full-width="false"-->
-                                    <!--                                            :arrow="true"-->
-                                    <!--                                            @contextmenu.native="onCopy(idx, item, $event)"-->
-                                    <!--                                        />-->
+                                    <text-message
+                                        v-if="item.msg_type !== 1"
+                                        :content="item.text"
+                                        :float="item.float"
+                                        :full-width="false"
+                                        :arrow="true"
+                                        @contextmenu.native="onCopy(idx, item, $event)"
+                                    />
 
                                     <!--                                        &lt;!&ndash; 图片消息 &ndash;&gt;
                                     <image-message
@@ -283,7 +283,8 @@ import {
     ServeSendTalkText
 } from '@/api/chat';
 
-import { sendText } from '@/utils/nim';
+import { sendText, getHistoryMsgs } from '@/utils/nim';
+import TextMessage from '@/components/chat/messaege/TextMessage.vue';
 
 export default {
     name: 'TalkEditorPanel',
@@ -294,7 +295,8 @@ export default {
         GroupNotice,
         SvgMentionDown,
         PanelToolbar,
-        PanelHeader
+        PanelHeader,
+        TextMessage
     },
     props: {
         // 对话相关参数
@@ -445,6 +447,40 @@ export default {
 
         // 加载用户聊天详情信息
         loadChatRecords() {
+            getHistoryMsgs().then(res => {
+                const records = res.msgs.map(item => {
+                    item.float = 'center';
+                    if (item.user_id > 0) {
+                        item.float = item.user_id == user_id ? 'right' : 'left';
+                    }
+
+                    return item;
+                });
+
+                console.log(records);
+
+                // 判断是否是初次加载
+                // if (data.record_id == 0) {
+                //     this.$store.commit('SET_DIALOGUE', []);
+                // }
+
+                this.$store.commit('UNSHIFT_DIALOGUE', records.reverse());
+
+                // this.loadRecord.status = records.length >= res.data.limit ? 1 : 2;
+                this.loadRecord.status = 2;
+
+                // this.loadRecord.minRecord = res.data.record_id;
+
+                this.$nextTick(() => {
+                    // if (data.record_id == 0) {
+                    //     el.scrollTop = el.scrollHeight;
+                    // } else {
+                    //     el.scrollTop = el.scrollHeight - scrollHeight;
+                    // }
+                });
+            });
+
+            return;
             const user_id = this.uid;
             const data = {
                 record_id: this.loadRecord.minRecord,
@@ -458,48 +494,48 @@ export default {
             const el = document.getElementById('lumenChatPanel');
             const scrollHeight = el.scrollHeight;
 
-            ServeTalkRecords(data)
-                .then(res => {
-                    // 防止点击切换过快消息返回延迟，导致信息错误
-                    if (
-                        res.code != 200 ||
-                        data.receiver_id != this.params.receiver_id &&
-                            data.talk_type != this.params.talk_type
-                    ) {
-                        return;
-                    }
-
-                    const records = res.data.rows.map(item => {
-                        item.float = 'center';
-                        if (item.user_id > 0) {
-                            item.float = item.user_id == user_id ? 'right' : 'left';
-                        }
-
-                        return item;
-                    });
-
-                    // 判断是否是初次加载
-                    if (data.record_id == 0) {
-                        this.$store.commit('SET_DIALOGUE', []);
-                    }
-
-                    this.$store.commit('UNSHIFT_DIALOGUE', records.reverse());
-
-                    this.loadRecord.status = records.length >= res.data.limit ? 1 : 2;
-
-                    this.loadRecord.minRecord = res.data.record_id;
-
-                    this.$nextTick(() => {
-                        if (data.record_id == 0) {
-                            el.scrollTop = el.scrollHeight;
-                        } else {
-                            el.scrollTop = el.scrollHeight - scrollHeight;
-                        }
-                    });
-                })
-                .catch(() => {
-                    this.loadRecord.status = 1;
-                });
+            // ServeTalkRecords(data)
+            //     .then(res => {
+            //         // 防止点击切换过快消息返回延迟，导致信息错误
+            //         if (
+            //             res.code != 200 ||
+            //             data.receiver_id != this.params.receiver_id &&
+            //                 data.talk_type != this.params.talk_type
+            //         ) {
+            //             return;
+            //         }
+            //
+            //         const records = res.data.rows.map(item => {
+            //             item.float = 'center';
+            //             if (item.user_id > 0) {
+            //                 item.float = item.user_id == user_id ? 'right' : 'left';
+            //             }
+            //
+            //             return item;
+            //         });
+            //
+            //         // 判断是否是初次加载
+            //         if (data.record_id == 0) {
+            //             this.$store.commit('SET_DIALOGUE', []);
+            //         }
+            //
+            //         this.$store.commit('UNSHIFT_DIALOGUE', records.reverse());
+            //
+            //         this.loadRecord.status = records.length >= res.data.limit ? 1 : 2;
+            //
+            //         this.loadRecord.minRecord = res.data.record_id;
+            //
+            //         this.$nextTick(() => {
+            //             if (data.record_id == 0) {
+            //                 el.scrollTop = el.scrollHeight;
+            //             } else {
+            //                 el.scrollTop = el.scrollHeight - scrollHeight;
+            //             }
+            //         });
+            //     })
+            //     .catch(() => {
+            //         this.loadRecord.status = 1;
+            //     });
         },
 
         // 多选处理方式

@@ -2,12 +2,12 @@
 import { getSessionList } from '@/utils/nim/user';
 import { ElNotification } from 'element-plus';
 import { useStore } from 'vuex';
-import { SESSION_LIST } from '@/store/modules/nim/constants';
+import { SESSION_LIST,CURRENT_SESSION_LIST } from '@/store/modules/nim/constants';
 import { findTalkIndex } from '@/utils/talk';
 
 const store = useStore();
 const sessionList = computed(() => store.state.nim.sessionList);
-let index_name = 'azhuang'
+let index_name = ref('');
 
 // 点击回话列表，渲染会话
 const useClickSessionEffect = () => {
@@ -17,7 +17,8 @@ const useClickSessionEffect = () => {
     const params = reactive({
         talk_type: 0,
         receiver_id: 0,
-        nickname: ''
+        nickname: '',
+        is_robot: 0,
     })
     // 切换聊天栏目
     const clickSession = (account) => {
@@ -27,12 +28,22 @@ const useClickSessionEffect = () => {
             //todo 判断
         }
 
-        index_name = account
+        index_name.value = account
 
+        //todo 区分群组
         params.talk_type = 1;
-        params.receiver_id = 1;
+        params.receiver_id = account;
         params.nickname = account;
-        params.is_robot = 0;
+
+        // todo 不能使用 toRaw(params) ?bug
+        store.dispatch({
+            type:CURRENT_SESSION_LIST,
+            currentSession: {
+                talk_type: 1,
+                receiver_id: account,
+                is_robot: 0
+            }
+        })
 
         store.commit('UPDATE_DIALOGUE_MESSAGE', {
             talk_type: 1,
@@ -40,7 +51,7 @@ const useClickSessionEffect = () => {
             is_robot: 0
         });
 
-        nextTick(() => {
+        // nextTick(() => {
             // if (index_name == this.index_name) {
             //     store.commit('UPDATE_TALK_ITEM', {
             //         index_name,
@@ -52,7 +63,7 @@ const useClickSessionEffect = () => {
                 //     receiver_id: parseInt(receiver_id)
                 // });
             // }
-        });
+        // });
     }
 
     return {
@@ -177,7 +188,7 @@ export default {
         // 当前对话好友在线状态
         isFriendOnline() {
             const index = findTalkIndex(this.index_name);
-            return index >= 0 && this.talks[index].is_online == 1;
+            // return index >= 0 && this.talks[index].is_online == 1;
         }
     },
     watch: {
@@ -605,7 +616,7 @@ export default {
                                                 v-for="item in sessionList"
                                                 :key="item.id"
                                                 class="talk-item pointer"
-                                                :class="{ active: index_name == item.account }"
+                                                :class="{ active: index_name === item.account }"
                                                 @click="clickSession(item.account)"
                                                 @contextmenu.prevent="talkItemsMenu(item, $event)"
                                             >
@@ -717,7 +728,7 @@ export default {
                     <pane>
                         <!-- 聊天面板容器 -->
                         <el-main class="ov-hidden full-height no-padding">
-                            <WelcomeModule v-if="index_name == null" />
+                            <WelcomeModule v-if="index_name === ''" />
                             <TalkPanel
                                 v-else
                                 class="full-height"

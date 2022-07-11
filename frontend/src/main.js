@@ -14,7 +14,6 @@ import registerDirectives from './core/directives'; // 自定义指令
 // import './core/global-component'; // 全局插件
 
 import { myPlugin } from '@/components/user/user-card';
-import VueGridLayout from 'vue-grid-layout';
 
 import {
     AudioMessage,
@@ -37,7 +36,6 @@ import {
 
 const app = createApp(App);
 registerDirectives(app);
-app.use(VueGridLayout);
 // app.component(AudioMessage.name, AudioMessage);
 // app.component(CodeMessage.name, CodeMessage);
 // app.component(ForwardMessage.name, ForwardMessage);

@@ -10,5 +10,8 @@ export const mutations = {
     },
     [c.CONNECT_NOTIFICATION](state, payload) {
         state.connectNotification = payload.notification;
+    },
+    [c.CURRENT_SESSION_LIST](state, payload) {
+        state.currentSessionList.push(payload.currentSession);
     }
 };

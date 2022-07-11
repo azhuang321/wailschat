@@ -27,12 +27,36 @@ export const getNimInstance = async () => {
                 onmyinfo: onMyInfo,
                 onwillreconnect: onWillReconnect,
                 ondisconnect: onDisConnect,
+                onpushevents: param => {
+                    // account: "azhuang1"
+                    // clientType: "Web"
+                    // custom: {}
+                    // idClient: "15fb8a65-08ec-4ef8-854c-1eea281652a3"
+                    // idServer: "debf1845-7732-481e-a233-624203090e81"
+                    // serverConfig: "{\"online\":[16]}"
+                    // time: "1657543885640"
+                    // type: "1"
+                    // value: "1"    //1 - 登录，2 - 登出，3 - 断开连接
+                    console.log('订阅事件', param.msgEvents);
+                },
                 onsyncdone: function onSyncDone() {
                     // 说明在聊天列表页
                     console.dir('同步完成');
                     resolve();
                 }
             });
+
+            setTimeout(() => {
+                nim.subscribeEvent({
+                    type: 1,
+                    accounts: ['azhuang1', 'azhuang2'],
+                    subscribeTime: 70,
+                    sync: true,
+                    done: (error, obj) => {
+                        console.log('订阅事件' + (!error ? '成功' : '失败'), error, obj);
+                    }
+                });
+            }, 2000);
         });
     }
     return nim;
@@ -146,5 +170,23 @@ export const sendText = async content => {
             }
         });
         console.log('正在发送p2p text消息, id=' + msg.idClient);
+    });
+};
+
+//获取云端消息 http://dev.yunxin.163.com/docs/interface/%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AFWeb%E7%AB%AF/NIMSDK-Web/NIM.html#getHistoryMsgs__anchor
+// todo 完善
+export const getHistoryMsgs = async () => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        nim.getHistoryMsgs({
+            scene: 'p2p',
+            to: 'azhuang1',
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
     });
 };
