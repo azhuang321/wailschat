@@ -11,7 +11,6 @@ const props = defineProps({
 const tabName = props.tabName;
 </script>
 <script>
-import { defineProps } from 'vue';
 import LeftAside from './LeftAside.vue';
 
 // 公用计算属性

@@ -4,6 +4,7 @@ import { ElNotification } from 'element-plus';
 import { useStore } from 'vuex';
 import { SESSION_LIST,CURRENT_SESSION_LIST } from '@/store/modules/nim/constants';
 import { findTalkIndex } from '@/utils/talk';
+import {defineProps} from 'vue';
 
 const store = useStore();
 const sessionList = computed(() => store.state.nim.sessionList);
@@ -60,6 +61,28 @@ const useClickSessionEffect = () => {
 const {params,clickSession} = useClickSessionEffect()
 
 useSessionListEffect()
+
+const { screeWidthDynamic } = useClientScreenEffect();
+
+const leftAsideMaxWidth = computed({
+    get:() => {
+        let width = (250 * 100)/(screeWidthDynamic.value-70);
+        if (width > 100) {
+            width = 100;
+        }
+        return width
+    }
+})
+
+const leftAsideMinWidth = computed({
+    get:() => {
+        let width = (60 * 100)/(screeWidthDynamic.value-70);
+        if (width > 100) {
+            width = 100;
+        }
+        return width
+    }
+})
 </script>
 
 <script>
@@ -109,6 +132,19 @@ const useSessionListEffect = () => {
                 message: '获取对话列表失败'
             });
         });
+};
+
+//计算屏幕宽度
+const useClientScreenEffect = () => {
+    const screeWidthDynamic = ref(document.body.clientWidth);
+    window.onresize = () => {
+        return (() => {
+            screeWidthDynamic.value = document.body.clientWidth;
+        })();
+    };
+    return {
+        screeWidthDynamic
+    };
 };
 
 export default {
@@ -497,117 +533,116 @@ export default {
 </script>
 
 <template>
-    <div>
-        <MainLayout v-slot:mainContainer="slotProps" tabName="message">
-            <!-- 左侧会话列表-->
-            <el-container class="full-height">
-                <splitpanes class="default-theme" >
-                    <pane max-size="20" min-size="10">
-                        <!-- 左侧侧边栏 -->
-                        <el-aside width="100%" class="aside-box">
-                            <el-container class="full-height" direction="vertical">
-                                <!-- 搜索栏 -->
-                                <el-header height="60px" class="header">
-                                    <div class="from-search">
-                                        <el-input
-                                            v-model="input"
-                                            :prefix-icon="Search"
-                                            placeholder="搜索聊天 / 好友 / 群组"
-                                        />
-                                    </div>
+    <MainLayout v-slot:mainContainer="slotProps" tab-name="message">
+        <!-- 左侧会话列表-->
+        <el-container class="full-height">
+            <splitpanes class="default-theme" >
+                <pane :size="leftAsideMaxWidth" :max-size="leftAsideMaxWidth" :min-size="leftAsideMinWidth">
+                    <!-- 左侧侧边栏 -->
+                    <el-aside width="100%" min-width="60px" class="aside-box">
+                        <el-container class="full-height" direction="vertical">
+                            <!-- 搜索栏 -->
+                            <el-header height="60px" class="header">
+                                <div class="from-search">
+                                    <el-input
+                                        v-model="input"
+                                        :prefix-icon="Search"
+                                        placeholder="搜索聊天 / 好友 / 群组"
+                                    />
+                                </div>
 
-                                    <!-- 工具栏 -->
-                                    <div v-outside="closeSubMenu" class="tools">
-                                        <el-button circle plain :icon="Plus" @click="subMenu = !subMenu" />
-                                        <transition name="el-zoom-in-top">
-                                            <div v-show="subMenu" class="tools-menu">
-                                                <div class="menu-item" @click="triggerSubMenu(1)">
-                                                    创建群组
-                                                </div>
-                                                <div class="menu-item" @click="triggerSubMenu(2)">
-                                                    添加好友
-                                                </div>
+                                <!-- 工具栏 -->
+                                <div v-outside="closeSubMenu" class="tools">
+                                    <el-button circle plain :icon="Plus" @click="subMenu = !subMenu" />
+                                    <transition name="el-zoom-in-top">
+                                        <div v-show="subMenu" class="tools-menu">
+                                            <div class="menu-item" @click="triggerSubMenu(1)">
+                                                创建群组
                                             </div>
-                                        </transition>
-                                    </div>
-                                </el-header>
+                                            <div class="menu-item" @click="triggerSubMenu(2)">
+                                                添加好友
+                                            </div>
+                                        </div>
+                                    </transition>
+                                </div>
+                            </el-header>
 
-                                <!-- 置顶栏 -->
-                                <!--            <header
-                                              v-show="loadStatus == 3 && topItems.length > 0"
-                                              class="subheader"
+                            <!-- 置顶栏 -->
+                            <!--            <header
+                                          v-show="loadStatus == 3 && topItems.length > 0"
+                                          class="subheader"
+                                        >
+                                          <div
+                                            v-for="item in topItems"
+                                            :key="item.index_name"
+                                            class="top-item"
+                                            @click="clickTab(item.index_name)"
+                                            @contextmenu.prevent="topItemsMenu(item, $event)"
+                                          >
+                                            <el-tooltip
+                                              effect="dark"
+                                              placement="top-start"
+                                              :content="item.remark_name ? item.remark_name : item.name"
                                             >
-                                              <div
-                                                v-for="item in topItems"
-                                                :key="item.index_name"
-                                                class="top-item"
-                                                @click="clickTab(item.index_name)"
-                                                @contextmenu.prevent="topItemsMenu(item, $event)"
-                                              >
-                                                <el-tooltip
-                                                  effect="dark"
-                                                  placement="top-start"
-                                                  :content="item.remark_name ? item.remark_name : item.name"
-                                                >
-                                                  <div class="avatar">
-                                                    <span v-show="!item.avatar">
-                                                      {{
-                                                        (item.remark_name
-                                                            ? item.remark_name
-                                                            : item.name
-                                                        ).substr(0, 1)
-                                                      }}
-                                                    </span>
-                                                    <img
-                                                      v-show="item.avatar"
-                                                      :src="item.avatar"
-                                                      :onerror="$store.state.detaultAvatar"
-                                                    />
-                                                  </div>
-                                                </el-tooltip>
-
-                                                <div
-                                                  class="name"
-                                                  :class="{ active: index_name == item.index_name }"
-                                                >
-                                                  {{ item.remark_name ? item.remark_name : item.name }}
-                                                </div>
+                                              <div class="avatar">
+                                                <span v-show="!item.avatar">
+                                                  {{
+                                                    (item.remark_name
+                                                        ? item.remark_name
+                                                        : item.name
+                                                    ).substr(0, 1)
+                                                  }}
+                                                </span>
+                                                <img
+                                                  v-show="item.avatar"
+                                                  :src="item.avatar"
+                                                  :onerror="$store.state.detaultAvatar"
+                                                />
                                               </div>
-                                            </header>-->
+                                            </el-tooltip>
 
-                                <!-- 对话列表栏 -->
-                                <el-scrollbar
-                                    ref="menusScrollbar"
-                                    tag="section"
-                                    class="full-height"
-                                    :native="false"
-                                >
-                                    <el-main class="main">
-                                        <p v-show="loadStatus == 2" class="empty-data">
-                                            <i class="el-icon-loading"></i> 数据加载中...
-                                        </p>
-
-                                        <p v-show="loadStatus == 3 && talkNum == 0" class="empty-data">
-                                            暂无聊天消息
-                                        </p>
-
-                                        <p v-show="loadStatus == 3 && talkNum > 0" class="main-menu">
-                                            <span class="title">消息记录 ({{ talkNum }})</span>
-                                        </p>
-
-                                         <p v-show="loadStatus == 4" style="text-align:center;">数据加载失败，请点击重试！</p>
-
-                                        <!-- 对话列表 -->
-                                        <template v-if="loadStatus != 3">
                                             <div
-                                                v-for="item in sessionList"
-                                                :key="item.id"
-                                                class="talk-item pointer"
-                                                :class="{ active: index_name === item.account }"
-                                                @click="clickSession(item.account)"
-                                                @contextmenu.prevent="talkItemsMenu(item, $event)"
+                                              class="name"
+                                              :class="{ active: index_name == item.index_name }"
                                             >
-                                                <div class="avatar-box">
+                                              {{ item.remark_name ? item.remark_name : item.name }}
+                                            </div>
+                                          </div>
+                                        </header>-->
+
+                            <!-- 对话列表栏 -->
+                            <el-scrollbar
+                                ref="menusScrollbar"
+                                tag="section"
+                                class="full-height"
+                                :native="false"
+                            >
+                                <el-main class="main">
+                                    <p v-show="loadStatus == 2" class="empty-data">
+                                        <i class="el-icon-loading"></i> 数据加载中...
+                                    </p>
+
+                                    <p v-show="loadStatus == 3 && talkNum == 0" class="empty-data">
+                                        暂无聊天消息
+                                    </p>
+
+                                    <p v-show="loadStatus == 3 && talkNum > 0" class="main-menu">
+                                        <span class="title">消息记录 ({{ talkNum }})</span>
+                                    </p>
+
+                                    <p v-show="loadStatus == 4" style="text-align:center;">数据加载失败，请点击重试！</p>
+
+                                    <!-- 对话列表 -->
+                                    <template v-if="loadStatus != 3">
+                                        <div
+                                            v-for="item in sessionList"
+                                            :key="item.id"
+                                            class="talk-item pointer"
+                                            :class="{ active: index_name === item.account }"
+                                            @click="clickSession(item.account)"
+                                            @contextmenu.prevent="talkItemsMenu(item, $event)"
+                                        >
+                                            <div class="avatar-box">
                                             <span v-show="!item.avatar">
                                                 {{
                                                     (item.alias ? item.alias : item.nick).substr(
@@ -616,76 +651,76 @@ export default {
                                                     )
                                                 }}
                                             </span>
-                                                    <img
-                                                        v-show="item.avatar"
-                                                        :src="item.avatar"
-                                                        :onerror="$store.state.detaultAvatar"
-                                                    />
-                                                    <div
-                                                        v-show="item.is_top == 0"
-                                                        class="top-mask"
-                                                        @click.stop="topChatItem(item)"
-                                                    >
-                                                        <i class="el-icon-top"></i>
-                                                    </div>
+                                                <img
+                                                    v-show="item.avatar"
+                                                    :src="item.avatar"
+                                                    :onerror="$store.state.detaultAvatar"
+                                                />
+                                                <div
+                                                    v-show="item.is_top == 0"
+                                                    class="top-mask"
+                                                    @click.stop="topChatItem(item)"
+                                                >
+                                                    <i class="el-icon-top"></i>
                                                 </div>
-                                                <div class="card-box">
-                                                    <div class="title">
-                                                        <div class="card-name">
-                                                            <p class="nickname">
-                                                                {{ item.alias ? item.alias : item.nick }}
-                                                            </p>
-                                                            <div v-show="item.unread_num" class="larkc-tag">
-                                                                {{ item.unread_num }}条未读
-                                                            </div>
-                                                            <div v-show="item.is_top" class="larkc-tag top">
-                                                                TOP
-                                                            </div>
-
-                                                            <div
-                                                                v-show="item.is_robot"
-                                                                class="larkc-tag top"
-                                                            >
-                                                                BOT
-                                                            </div>
-
-                                                            <div
-                                                                v-show="item.talk_type == 2"
-                                                                class="larkc-tag group"
-                                                            >
-                                                                群组
-                                                            </div>
-                                                            <div
-                                                                v-show="item.is_disturb"
-                                                                class="larkc-tag disturb"
-                                                            >
-                                                                <i
-                                                                    class="iconfont icon-xiaoximiandarao"
-                                                                ></i>
-                                                            </div>
+                                            </div>
+                                            <div class="card-box">
+                                                <div class="title">
+                                                    <div class="card-name">
+                                                        <p class="nickname">
+                                                            {{ item.alias ? item.alias : item.nick }}
+                                                        </p>
+                                                        <div v-show="item.unread_num" class="larkc-tag">
+                                                            {{ item.unread_num }}条未读
                                                         </div>
-                                                        <div class="card-time">
-                                                            <u-time
-                                                                :value="
+                                                        <div v-show="item.is_top" class="larkc-tag top">
+                                                            TOP
+                                                        </div>
+
+                                                        <div
+                                                            v-show="item.is_robot"
+                                                            class="larkc-tag top"
+                                                        >
+                                                            BOT
+                                                        </div>
+
+                                                        <div
+                                                            v-show="item.talk_type == 2"
+                                                            class="larkc-tag group"
+                                                        >
+                                                            群组
+                                                        </div>
+                                                        <div
+                                                            v-show="item.is_disturb"
+                                                            class="larkc-tag disturb"
+                                                        >
+                                                            <i
+                                                                class="iconfont icon-xiaoximiandarao"
+                                                            ></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-time">
+                                                        <u-time
+                                                            :value="
                                                             String(
                                                                 Math.ceil(item.updateTime / 1000)
                                                             )
                                                         "
-                                                            />
-                                                        </div>
+                                                        />
                                                     </div>
-                                                    <div class="content">
-                                                        <template
-                                                            v-if="
+                                                </div>
+                                                <div class="content">
+                                                    <template
+                                                        v-if="
                                                         index_name != item.index_name &&
                                                         item.draft_text
                                                     "
-                                                        >
-                                                            <span class="draft-color">[草稿]</span>
-                                                            <span>{{ item.draft_text }}</span>
-                                                        </template>
-                                                        <template v-else>
-                                                            <template v-if="item.is_robot == 0">
+                                                    >
+                                                        <span class="draft-color">[草稿]</span>
+                                                        <span>{{ item.draft_text }}</span>
+                                                    </template>
+                                                    <template v-else>
+                                                        <template v-if="item.is_robot == 0">
                                                         <span
                                                             v-if="item.talk_type == 1"
                                                             :class="{
@@ -698,48 +733,47 @@ export default {
                                                                     : '离线'
                                                             }}]
                                                         </span>
-                                                                <span v-else>[群消息]</span>
-                                                            </template>
-
-                                                            <span>{{ item?.lastMsg.text }}</span>
+                                                            <span v-else>[群消息]</span>
                                                         </template>
-                                                    </div>
+
+                                                        <span>{{ item?.lastMsg.text }}</span>
+                                                    </template>
                                                 </div>
                                             </div>
-                                        </template>
-                                    </el-main>
-                                </el-scrollbar>
-                            </el-container>
-                        </el-aside>
-                    </pane>
-                    <pane>
-                        <!-- 聊天面板容器 -->
-                        <el-main class="ov-hidden full-height no-padding">
-                            <WelcomeModule v-if="index_name === ''" />
-                            <TalkPanel
-                                v-else
-                                class="full-height"
-                                :params="params"
-                                :is-online="isFriendOnline"
-                                @change-talk="changeTalk"
-                                @close-talk="closeTalk"
-                            />
-                        </el-main>
-                    </pane>
-                </splitpanes>
-            </el-container>
-        </MainLayout>
+                                        </div>
+                                    </template>
+                                </el-main>
+                            </el-scrollbar>
+                        </el-container>
+                    </el-aside>
+                </pane>
+                <pane :size="100 - leftAsideMaxWidth">
+                    <!-- 聊天面板容器 -->
+                    <el-main class="ov-hidden full-height no-padding">
+                        <WelcomeModule v-if="index_name === ''" />
+                        <TalkPanel
+                            v-else
+                            class="full-height"
+                            :params="params"
+                            :is-online="isFriendOnline"
+                            @change-talk="changeTalk"
+                            @close-talk="closeTalk"
+                        />
+                    </el-main>
+                </pane>
+            </splitpanes>
+        </el-container>
+    </MainLayout>
 
-        <!-- 创建群聊组件 -->
-        <!--    <GroupLaunch
-              v-if="launchGroupShow"
-              @close="launchGroupShow = false"
-              @create-success="groupChatSuccess"
-            />
+    <!-- 创建群聊组件 -->
+    <!--    <GroupLaunch
+          v-if="launchGroupShow"
+          @close="launchGroupShow = false"
+          @create-success="groupChatSuccess"
+        />
 
-            &lt;!&ndash; 用户查询组件 &ndash;&gt;
-            <UserSearch ref="searchUsers" />-->
-    </div>
+        &lt;!&ndash; 用户查询组件 &ndash;&gt;
+        <UserSearch ref="searchUsers" />-->
 </template>
 
 <style lang="scss" scoped>
@@ -1059,8 +1093,6 @@ export default {
 
 @media screen and (max-width: 800px) {
     .aside-box {
-        width: 220px !important;
-
         .subheader {
             display: none;
         }
