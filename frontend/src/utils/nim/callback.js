@@ -1,3 +1,5 @@
+import store from '@/store';
+
 export const isConnect = ref(false);
 
 export const onConnect = event => {
@@ -45,4 +47,24 @@ export const onDisConnect = error => {
 // 回调: 用户信息
 export const onMyInfo = obj => {
     console.log('my info', obj);
+};
+
+export const onMsg = msg => {
+    console.log('收到消息', msg.scene, msg.type, msg);
+    msg.float = 'left';
+    store.commit('PUSH_DIALOGUE', msg);
+    // console.log(store);
+
+    // switch (msg.type) {
+    //     case 'custom':
+    //         onCustomMsg(msg);
+    //         break;
+    //     case 'notification':
+    //         // 处理群通知消息
+    //         onTeamNotificationMsg(msg);
+    //         break;
+    //     // 其它case
+    //     default:
+    //         break;
+    // }
 };

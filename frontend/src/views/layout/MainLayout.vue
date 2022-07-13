@@ -193,6 +193,7 @@ export default {
                             </router-link>
                         </el-tooltip>
                     </el-main>
+
                     <el-footer height="60px" class="fixed-sidebar">
                         <div class="menu-items" @click="logout">
                             <span class="logout">退出</span>

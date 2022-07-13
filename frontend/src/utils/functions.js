@@ -173,14 +173,13 @@ export function parseTime(time, cFormat) {
         date = time;
     } else {
         if (typeof time === 'string' && /^[0-9]+$/.test(time)) {
-            time = parseInt(time);
+            time = parseInt(time.replace(/-/g, '/'));
         }
         if (typeof time === 'number' && time.toString().length === 10) {
             time = time * 1000;
         }
-
         //todo bug
-        date = new Date(String(time).replace(/-/g, '/'));
+        date = new Date(time);
     }
 
     const formatObj = {
@@ -193,7 +192,7 @@ export function parseTime(time, cFormat) {
         a: date.getDay()
     };
 
-    const time_str = format.replace(/{([ymdhisa])+}/g, (result, key) => {
+    return format.replace(/{([ymdhisa])+}/g, (result, key) => {
         const value = formatObj[key];
         // Note: getDay() returns 0 on Sunday
         if (key === 'a') {
@@ -202,8 +201,6 @@ export function parseTime(time, cFormat) {
 
         return value.toString().padStart(2, '0');
     });
-
-    return time_str;
 }
 
 /**

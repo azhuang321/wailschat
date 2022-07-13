@@ -264,6 +264,16 @@
         </transition>
     </div>
 </template>
+
+<script setup>
+// const props = defineProps()
+const store = useStore();
+const records = computed(() => {
+    console.log(store.state.dialogue.records);
+    return store.state.dialogue.records;
+});
+</script>
+
 <script>
 import { mapState } from 'vuex';
 import TalkSearchRecord from '@/components/chat/TalkSearchRecord.vue';
@@ -285,6 +295,7 @@ import {
 
 import { sendText, getHistoryMsgs } from '@/utils/nim';
 import TextMessage from '@/components/chat/messaege/TextMessage.vue';
+import store from '@/store';
 
 export default {
     name: 'TalkEditorPanel',
@@ -358,7 +369,10 @@ export default {
             unreadMessage: state => state.talks.unreadMessage,
             inputEvent: state => state.notify.inputEvent,
             uid: state => state.user.uid,
-            records: state => state.dialogue.records,
+            // records: state => {
+            //     console.log(state.dialogue.records);
+            //     return state.dialogue.records;
+            // },
             index_name: state => state.dialogue.index_name
         })
     },
@@ -401,6 +415,17 @@ export default {
         // 回车键发送消息回调事件
         submitSendMesage(content) {
             sendText(content);
+
+            store.commit('PUSH_DIALOGUE', {
+                float: 'right',
+                text: content
+            });
+
+            let el = document.getElementById('lumenChatPanel');
+            let scrollHeight = el.scrollHeight;
+            nextTick(() => {
+                el.scrollTop = el.scrollHeight;
+            });
             // ServeSendTalkText({
             //     receiver_id: parseInt(this.params.receiver_id),
             //     talk_type: parseInt(this.params.talk_type),
@@ -447,17 +472,17 @@ export default {
 
         // 加载用户聊天详情信息
         loadChatRecords() {
+            //todo 获取登录的账号
+            let user_id = 'azhuang';
             getHistoryMsgs().then(res => {
                 const records = res.msgs.map(item => {
                     item.float = 'center';
-                    if (item.user_id > 0) {
-                        item.float = item.user_id == user_id ? 'right' : 'left';
+                    if (item.from !== '') {
+                        item.float = item.from == user_id ? 'right' : 'left';
                     }
 
                     return item;
                 });
-
-                console.log(records);
 
                 // 判断是否是初次加载
                 // if (data.record_id == 0) {
@@ -472,6 +497,10 @@ export default {
                 // this.loadRecord.minRecord = res.data.record_id;
 
                 this.$nextTick(() => {
+                    el.scrollTop = el.scrollHeight;
+                    console.log(el.scrollTop);
+                    console.log(el.scrollHeight);
+
                     // if (data.record_id == 0) {
                     //     el.scrollTop = el.scrollHeight;
                     // } else {
@@ -481,7 +510,7 @@ export default {
             });
 
             return;
-            const user_id = this.uid;
+            // const user_id = this.uid;
             const data = {
                 record_id: this.loadRecord.minRecord,
                 receiver_id: this.params.receiver_id,
@@ -997,7 +1026,7 @@ export default {
         }
 
         .avatar-column {
-            width: 40px;
+            width: 50px;
             flex-basis: 40px;
             flex-shrink: 0;
             display: flex;
@@ -1005,7 +1034,7 @@ export default {
             order: 2;
             user-select: none;
             padding-top: 22px;
-            flex-direction: column;
+            //flex-direction: column;
         }
 
         .main-column {

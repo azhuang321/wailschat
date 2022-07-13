@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import { onConnect, onError, onWillReconnect, onDisConnect, onMyInfo } from './callback';
+import { onConnect, onError, onWillReconnect, onDisConnect, onMyInfo, onMsg } from './callback';
 
 import(`../../nim_sdk/${config.sdk}.js`);
 let nim = null;
@@ -43,7 +43,8 @@ export const getNimInstance = async () => {
                     // 说明在聊天列表页
                     console.dir('同步完成');
                     resolve();
-                }
+                },
+                onmsg: onMsg
             });
 
             setTimeout(() => {

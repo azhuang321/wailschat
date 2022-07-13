@@ -7,7 +7,7 @@
             'max-width': !fullWidth
         }"
     >
-        <div v-if="arrow" class="arrow"></div>
+        <!--        <div v-if="arrow" class="arrow"></div>-->
         <pre v-html="html"></pre>
     </div>
 </template>
@@ -60,16 +60,17 @@ $bg-right-color: #1ebafc;
     min-height: 30px;
     border-radius: 5px;
     padding: 5px;
+    background: #eff0f1;
 
-    .arrow {
-        position: absolute;
-        width: 0;
-        height: 0;
-        font-size: 0;
-        border: 5px solid;
-        top: 6px;
-        left: -10px;
-    }
+    //.arrow {
+    //    position: absolute;
+    //    width: 0;
+    //    height: 0;
+    //    font-size: 0;
+    //    border: 5px solid;
+    //    top: 6px;
+    //    left: -10px;
+    //}
 
     &.max-width {
         max-width: calc(100% - 50px);
@@ -100,10 +101,11 @@ $bg-right-color: #1ebafc;
         overflow: hidden;
         word-break: break-word;
         word-wrap: break-word;
-        font-size: 15px;
+        font-size: 14px;
         padding: 3px 10px;
         font-family: 'Microsoft YaHei';
         line-height: 25px;
+        margin: 0;
     }
 }
 </style>
