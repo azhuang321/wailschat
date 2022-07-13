@@ -1,59 +1,33 @@
+<script setup>
+const { themeBagImg, themeMode } = useComputedVarEffect();
+const props = defineProps({
+    tabName: {
+        type: String,
+        default: 'message'
+    }
+});
+
+// 父类传递给左侧tab标签
+const tabName = props.tabName;
+</script>
 <script>
-import { mapState, mapGetters, useStore } from 'vuex';
-import AccountCard from '@/components/user/AccountCard.vue';
+import { defineProps } from 'vue';
 import LeftAside from './LeftAside.vue';
-import { ServeFindFriendApplyNum } from '@/api/contacts';
+
+// 公用计算属性
+const useComputedVarEffect = () => {
+    const store = useStore();
+    const themeBagImg = computed(() => store.state.settings.themeBagImg);
+    const themeMode = computed(() => store.state.settings.themeMode);
+    return {
+        themeBagImg,
+        themeMode
+    };
+};
 
 export default {
     name: 'MainLayout',
-    components: {
-        AccountCard,
-        LeftAside
-        // RewardModule,
-        // AbsModule
-    },
-    props: {
-        idx: {
-            type: Number,
-            default: 0
-        }
-    },
-    computed: {
-        ...mapState({
-            userAvatar: state => state.user.avatar,
-            detaultAvatar: state => state.detaultAvatar,
-            applyNum: state => state.notify.applyNum,
-            notifyCueTone: state => state.settings.notifyCueTone,
-            themeMode: state => state.settings.themeMode,
-            themeBagImg: state => state.settings.themeBagImg
-        }),
-        ...mapGetters(['unreadNum'])
-    },
-    watch: {
-        unreadNum(n, o) {
-            if (n > 0 && n > o && this.notifyCueTone) {
-                this.play();
-            }
-        }
-    },
-    created() {
-        this.setApplyNum();
-    },
-    methods: {
-        play() {
-            document.querySelector('#audio').play();
-        },
-        logout() {
-            this.$store.dispatch('ACT_USER_LOGOUT');
-        },
-        setApplyNum() {
-            ServeFindFriendApplyNum().then(res => {
-                if (res.code == 200 && res.data.unread_num > 0) {
-                    this.$store.commit('INCR_APPLY_NUM');
-                }
-            });
-        }
-    }
+    components: { LeftAside }
 };
 </script>
 
@@ -63,11 +37,11 @@ export default {
         <el-container class="main-layout" :class="{ 'full-mode': themeMode }">
             <!-- 左侧导航栏-->
             <el-aside width="70px" class="side-edge">
-                <LeftAside />
+                <LeftAside :tab-name="tabName" />
             </el-aside>
             <!-- 右侧聊天相关-->
             <el-main class="no-padding" style="background: white">
-                <slot name="container"></slot>
+                <slot name="mainContainer"></slot>
             </el-main>
         </el-container>
 

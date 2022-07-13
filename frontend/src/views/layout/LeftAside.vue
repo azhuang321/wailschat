@@ -14,6 +14,15 @@ store.dispatch({
 });
 
 watchEffect(watchFunc);
+
+const props = defineProps({
+    tabName: {
+        type: String,
+        default: 'message'
+    }
+});
+
+const tabName = props.tabName;
 </script>
 <script>
 import { mapGetters, mapState, useStore } from 'vuex';
@@ -26,14 +35,11 @@ import { isConnect } from '@/utils/nim/callback';
 import { ChatDotRound, UserFilled, Tools } from '@element-plus/icons-vue';
 import { ServeFindFriendApplyNum } from '@/api/contacts';
 
+import AccountCard from '@/components/user/AccountCard.vue';
+
 export default {
     name: 'LeftAside',
-    props: {
-        idx: {
-            type: Number,
-            default: 0
-        }
-    },
+    components: [AccountCard],
     computed: {
         ...mapState({
             userAvatar: state => state.user.avatar,
@@ -157,7 +163,7 @@ v-if="socketStatus === CONNECT_STATUS_ENUM.connected" class="online"
         <el-main class="sidebar-menu">
             <el-tooltip content="我的消息" placement="right" :show-arrow="false">
                 <router-link to="/message">
-                    <div class="menu-items" :class="{ active: idx == 0 }">
+                    <div class="menu-items" :class="{ active: tabName === 'message' }">
                         <ChatDotRound />
                         <span v-show="unreadNum" class="notify"></span>
                     </div>
@@ -166,7 +172,7 @@ v-if="socketStatus === CONNECT_STATUS_ENUM.connected" class="online"
 
             <el-tooltip content="我的联系人" placement="right" :show-arrow="false">
                 <router-link to="/contacts">
-                    <div class="menu-items" :class="{ active: idx == 1 }">
+                    <div class="menu-items" :class="{ active: tabName == 1 }">
                         <UserFilled />
                         <span v-show="applyNum" class="notify"></span>
                     </div>
@@ -174,7 +180,7 @@ v-if="socketStatus === CONNECT_STATUS_ENUM.connected" class="online"
             </el-tooltip>
             <el-tooltip content="我的设置" placement="right" :show-arrow="false">
                 <router-link to="/settings">
-                    <div class="menu-items" :class="{ active: idx == 3 }">
+                    <div class="menu-items" :class="{ active: tabName == 3 }">
                         <Tools />
                     </div>
                 </router-link>

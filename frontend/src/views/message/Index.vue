@@ -50,20 +50,6 @@ const useClickSessionEffect = () => {
             receiver_id: account,
             is_robot: 0
         });
-
-        // nextTick(() => {
-            // if (index_name == this.index_name) {
-            //     store.commit('UPDATE_TALK_ITEM', {
-            //         index_name,
-            //         unread_num: 0
-            //     });
-                // 清空消息未读数(后期改成WebSocket发送消息)
-                // ServeClearTalkUnreadNum({
-                //     talk_type: parseInt(talk_type),
-                //     receiver_id: parseInt(receiver_id)
-                // });
-            // }
-        // });
     }
 
     return {
@@ -512,7 +498,8 @@ export default {
 
 <template>
     <div>
-        <MainLayout #container :idx="0">
+        <MainLayout v-slot:mainContainer="slotProps" tabName="message">
+            <!-- 左侧会话列表-->
             <el-container class="full-height">
                 <splitpanes class="default-theme" >
                     <pane max-size="20" min-size="10">
@@ -740,7 +727,6 @@ export default {
                         </el-main>
                     </pane>
                 </splitpanes>
-                <!-- <el-aside width="350px" class="panel-aside"></el-aside> -->
             </el-container>
         </MainLayout>
 
