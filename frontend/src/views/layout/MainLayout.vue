@@ -1,94 +1,14 @@
-<script setup>
-const usercard = ref(null);
-
-const store = useStore();
-const { ChatDotRound, UserFilled, Tools } = useIconEffect();
-
-const socketStatus = computed(() => store.getters.connectStatus);
-
-const { CONNECT_STATUS_ENUM, notifyFunc, watchFunc } = useInitEffect(socketStatus);
-
-store.dispatch({
-    type: CONNECT_NOTIFICATION,
-    notification: notifyFunc()
-});
-
-watchEffect(watchFunc);
-</script>
-
 <script>
 import { mapState, mapGetters, useStore } from 'vuex';
 import AccountCard from '@/components/user/AccountCard.vue';
+import LeftAside from './LeftAside.vue';
 import { ServeFindFriendApplyNum } from '@/api/contacts';
-import {
-    CONNECT_STATUS,
-    CONNECT_STATUS_ENUM,
-    CONNECT_NOTIFICATION
-} from '@/store/modules/nim/constants';
-import { isConnect } from '@/utils/nim/callback';
-
-import { ChatDotRound, UserFilled, Tools } from '@element-plus/icons-vue';
-
-//使用图标
-const useIconEffect = () => {
-    return {
-        ChatDotRound: markRaw(ChatDotRound),
-        UserFilled: markRaw(UserFilled),
-        Tools: markRaw(Tools)
-    };
-};
-
-// socket 状态监听
-const useInitEffect = socketStatus => {
-    const store = useStore();
-
-    const notifyFunc = () => {
-        if (socketStatus.value === CONNECT_STATUS_ENUM.connected) {
-            return;
-        }
-        if (typeof store.state.nim.connectNotification === 'object') {
-            return store.state.nim.connectNotification;
-        }
-
-        return ElNotification.error({
-            message: '断开连接，正在尝试重新连接',
-            duration: 0,
-            showClose: false
-        });
-    };
-
-    const watchFunc = () => {
-        if (isConnect.value === true) {
-            if (typeof store.state.nim.connectNotification === 'object') {
-                store.state.nim.connectNotification.close();
-            }
-            store.dispatch({
-                type: CONNECT_STATUS,
-                status: CONNECT_STATUS_ENUM.connected
-            });
-        } else {
-            store.dispatch({
-                type: CONNECT_NOTIFICATION,
-                notification: notifyFunc()
-            });
-            store.dispatch({
-                type: CONNECT_STATUS,
-                status: CONNECT_STATUS_ENUM.disconnect
-            });
-        }
-    };
-
-    return {
-        CONNECT_STATUS_ENUM,
-        notifyFunc,
-        watchFunc
-    };
-};
 
 export default {
     name: 'MainLayout',
     components: {
-        AccountCard
+        AccountCard,
+        LeftAside
         // RewardModule,
         // AbsModule
     },
@@ -138,70 +58,14 @@ export default {
 </script>
 
 <template>
+    <!-- 整个页面-->
     <div class="body-bag" :class="themeBagImg">
         <el-container class="main-layout" :class="{ 'full-mode': themeMode }">
+            <!-- 左侧导航栏-->
             <el-aside width="70px" class="side-edge">
-                <el-container class="full-height">
-                    <el-header height="100px" class="logo-header">
-                        <div ref="usercard" class="userlogo">
-                            <img :src="userAvatar" :onerror="detaultAvatar" />
-                        </div>
-                        <!-- 用户卡片 -->
-                        <el-popover
-                            :virtual-ref="usercard"
-                            virtual-triggering
-                            trigger="hover"
-                            placement="right-start"
-                            popper-class="no-padding"
-                        >
-                            <AccountCard />
-                        </el-popover>
-
-                        <p class="user-status">
-                            <span
-                                v-if="socketStatus === CONNECT_STATUS_ENUM.connected"
-                                class="online"
-                            >在线</span
-                            >
-                            <span v-else>连接中...</span>
-                        </p>
-                    </el-header>
-
-                    <el-main class="sidebar-menu">
-                        <el-tooltip content="我的消息" placement="right" :show-arrow="false">
-                            <router-link to="/message">
-                                <div class="menu-items" :class="{ active: idx == 0 }">
-                                    <ChatDotRound />
-                                    <span v-show="unreadNum" class="notify"></span>
-                                </div>
-                            </router-link>
-                        </el-tooltip>
-
-                        <el-tooltip content="我的联系人" placement="right" :show-arrow="false">
-                            <router-link to="/contacts">
-                                <div class="menu-items" :class="{ active: idx == 1 }">
-                                    <UserFilled />
-                                    <span v-show="applyNum" class="notify"></span>
-                                </div>
-                            </router-link>
-                        </el-tooltip>
-                        <el-tooltip content="我的设置" placement="right" :show-arrow="false">
-                            <router-link to="/settings">
-                                <div class="menu-items" :class="{ active: idx == 3 }">
-                                    <Tools />
-                                </div>
-                            </router-link>
-                        </el-tooltip>
-                    </el-main>
-
-                    <el-footer height="60px" class="fixed-sidebar">
-                        <div class="menu-items" @click="logout">
-                            <span class="logout">退出</span>
-                        </div>
-                    </el-footer>
-                </el-container>
+                <LeftAside />
             </el-aside>
-
+            <!-- 右侧聊天相关-->
             <el-main class="no-padding" style="background: white">
                 <slot name="container"></slot>
             </el-main>
