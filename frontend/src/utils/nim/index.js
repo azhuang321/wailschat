@@ -147,6 +147,25 @@ export const getServerSessions = async () => {
     });
 };
 
+//获取本地群组列表
+export const getLocalTeams = async teamIds => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        if (teamIds.length === 0) {
+            return resolve([]);
+        }
+        nim.getLocalTeams({
+            teamIds: teamIds,
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
+    });
+};
+
 // 发送消息 todo 完善发送设置
 export const sendText = async content => {
     const nim = await getNimInstance();

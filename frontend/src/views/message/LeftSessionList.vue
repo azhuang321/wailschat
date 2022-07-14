@@ -84,6 +84,7 @@ import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api
 import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
 import { ServeSecedeGroup } from "@/api/group";
 
+//获取左侧会话列表
 const useSessionListEffect = () => {
     const store = useStore();
     getSessionList()
@@ -578,7 +579,8 @@ export default {
                     >
                         <div class="avatar-box">
                             <span v-show="!item.avatar">
-                                {{ (item.alias ? item.alias : item.nick).substr(0, 1) }}
+<!--                                todo 统一群名称 与用户名称-->
+                                {{ (item.alias ? item.alias : item.name).substr(0, 1) }}
                             </span>
                             <img
                                 v-show="item.avatar"
