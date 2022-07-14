@@ -1,109 +1,112 @@
 <script setup>
-import { getSessionList } from '@/utils/nim/user';
-import { ElNotification } from 'element-plus';
-import { useStore } from 'vuex';
-import { SESSION_LIST,CURRENT_SESSION_LIST } from '@/store/modules/nim/constants';
-import { findTalkIndex } from '@/utils/talk';
+import { useStore } from "vuex";
+import { findTalkIndex } from "@/utils/talk";
+import { CURRENT_SESSION_LIST } from "@/store/modules/nim/constants";
 
-const { screeWidthDynamic } = useClientScreenEffect();
-
-//左侧会话列表宽度计算
-const leftAsideMaxWidth = computed({
-    get:() => {
-        let width = (250 * 100)/(screeWidthDynamic.value-70);
-        if (width > 100) {
-            width = 100;
-        }
-        return width
-    }
-})
-
-const leftAsideMinWidth = computed({
-    get:() => {
-        let width = (60 * 100)/(screeWidthDynamic.value-70);
-        if (width > 100) {
-            width = 100;
-        }
-        return width
-    }
-})
-
+const store = useStore();
+const sessionList = computed(() => store.state.nim.sessionList);
 let index_name = ref('');
-// 对话面板的传递参数
-let params = reactive({
-    talk_type: 0,
-    receiver_id: 0,
-    nickname: '',
-    is_robot: 0,
-})
 
-function clickSession(data){
-    index_name.value = data.index_name.value
-    params = Object.assign(params,data.params)
+// 点击回话列表，渲染会话
+const useClickSessionEffect = () => {
+    const store = useStore();
+
+    // 对话面板的传递参数
+    const params = reactive({
+        talk_type: 0,
+        receiver_id: 0,
+        nickname: '',
+        is_robot: 0,
+    })
+    // 切换聊天栏目
+    const clickSession = (account) => {
+        const index = findTalkIndex(account);
+
+        if (index == -1) {
+            //todo 判断
+        }
+
+        index_name.value = account
+
+        //todo 区分群组
+        params.talk_type = 1;
+        params.receiver_id = account;
+        params.nickname = account;
+
+        // todo 不能使用 toRaw(params) ?bug
+        store.dispatch({
+            type:CURRENT_SESSION_LIST,
+            currentSession: {
+                talk_type: 1,
+                receiver_id: account,
+                is_robot: 0
+            }
+        })
+
+        store.commit('UPDATE_DIALOGUE_MESSAGE', {
+            talk_type: 1,
+            receiver_id: account,
+            is_robot: 0
+        });
+    }
+
+    return {
+        params, clickSession
+    }
 }
+
+const {params,clickSession} = useClickSessionEffect()
+
+useSessionListEffect()
+
+//子组件向父级传值
+const emit = defineEmits(['clickSession'])
+function handleClickSession(account) {
+    clickSession(account)
+    emit('clickSession', {index_name,params})
+}
+
+
+
+
 </script>
-
 <script>
-import { mapGetters, mapState, useStore } from 'vuex';
-import MainLayout from '@/views/layout/MainLayout.vue';
-import LeftSessionList from './LeftSessionList.vue'
-import WelcomeModule from '@/components/layout/WelcomeModule.vue';
-import GroupLaunch from '@/components/group/GroupLaunch.vue';
-import TalkPanel from '@/components/chat/panel/TalkPanel.vue';
-import UserSearch from '@/components/user/UserSearch.vue';
-import UTime from './utime.vue';
-import {
-    ServeClearTalkUnreadNum,
-    ServeDeleteTalkList,
-    ServeTopTalkList,
-    ServeSetNotDisturb
-} from '@/api/chat';
-import { ServeDeleteContact, ServeEditContactRemark } from '@/api/contacts';
-import { ServeSecedeGroup } from '@/api/group';
-import { beautifyTime } from '@/utils/functions';
-import { findTalkIndex, getCacheIndexName } from '@/utils/talk';
+//获取对话列表
+import { mapGetters, mapState, useStore } from "vuex";
+import { getSessionList } from "@/utils/nim/user";
+import { SESSION_LIST } from "@/store/modules/nim/constants";
+import { ElNotification } from "element-plus";
+import UTime from "@/views/message/utime.vue";
+import { findTalkIndex, getCacheIndexName } from "@/utils/talk";
+import { Plus, Search } from "@element-plus/icons-vue";
+import { beautifyTime } from "@/utils/functions";
+import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api/chat";
+import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
+import { ServeSecedeGroup } from "@/api/group";
 
-import { Plus, Search } from '@element-plus/icons-vue';
-import { getSessionList } from '@/utils/nim/user';
-import { SESSION_LIST } from '@/store/modules/nim/constants';
-import { ElNotification } from 'element-plus';
-
-// 文档：https://antoniandre.github.io/splitpanes/
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
-
+const useSessionListEffect = () => {
+    const store = useStore();
+    getSessionList()
+        .then(res => {
+            store.dispatch({
+                type: SESSION_LIST,
+                session: res
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            ElNotification({
+                type: 'error',
+                message: '获取对话列表失败'
+            });
+        });
+};
 const title = document.title;
 
-
-
-
-
-
-
-
-//计算屏幕宽度
-const useClientScreenEffect = () => {
-    const screeWidthDynamic = ref(document.body.clientWidth);
-    window.onresize = () => {
-        return (() => {
-            screeWidthDynamic.value = document.body.clientWidth;
-        })();
-    };
-    return {
-        screeWidthDynamic
-    };
-};
-
 export default {
-    name: 'MessagePage',
+    name: 'LeftSessionList',
     components: {
-        MainLayout,
-        LeftSessionList,
-        // GroupLaunch,
-        TalkPanel,
-        // UserSearch,
-        WelcomeModule,
-        UTime,Splitpanes, Pane
+        UTime
     },
 
     beforeRouteUpdate(to, from, next) {
@@ -479,47 +482,170 @@ export default {
     }
 };
 </script>
-
 <template>
-    <MainLayout v-slot:mainContainer="slotProps" tab-name="message">
-        <el-container class="full-height">
-            <splitpanes class="default-theme" >
-                <!-- 左侧会话列表-->
-                <pane :size="leftAsideMaxWidth" :max-size="leftAsideMaxWidth" :min-size="leftAsideMinWidth">
-                    <!-- 左侧侧边栏 -->
-                    <el-aside width="100%" min-width="60px" class="aside-box">
-                        <LeftSessionList @clickSession="clickSession" />
-                    </el-aside>
-                </pane>
-                <!-- 右侧聊天窗口-->
-                <pane :size="100 - leftAsideMaxWidth">
-                    <!-- 聊天面板容器 -->
-                    <el-main class="ov-hidden full-height no-padding">
-                        <WelcomeModule v-if="index_name === ''" />
-                        <TalkPanel
-                            v-else
-                            class="full-height"
-                            :params="params"
-                            :is-online="isFriendOnline"
-                            @change-talk="changeTalk"
-                            @close-talk="closeTalk"
-                        />
-                    </el-main>
-                </pane>
-            </splitpanes>
-        </el-container>
-    </MainLayout>
+    <el-container class="full-height" direction="vertical">
+        <!-- 搜索栏 -->
+        <el-header height="60px" class="header">
+            <div class="from-search">
+                <el-input
+                    v-model="input"
+                    :prefix-icon="Search"
+                    placeholder="搜索聊天 / 好友 / 群组"
+                />
+            </div>
 
-    <!-- 创建群聊组件 -->
-    <!--    <GroupLaunch
-          v-if="launchGroupShow"
-          @close="launchGroupShow = false"
-          @create-success="groupChatSuccess"
-        />
+            <!-- 工具栏 -->
+            <div v-outside="closeSubMenu" class="tools">
+                <el-button circle plain :icon="Plus" @click="subMenu = !subMenu" />
+                <transition name="el-zoom-in-top">
+                    <div v-show="subMenu" class="tools-menu">
+                        <div class="menu-item" @click="triggerSubMenu(1)">创建群组</div>
+                        <div class="menu-item" @click="triggerSubMenu(2)">添加好友</div>
+                    </div>
+                </transition>
+            </div>
+        </el-header>
 
-        &lt;!&ndash; 用户查询组件 &ndash;&gt;
-        <UserSearch ref="searchUsers" />-->
+        <!-- 置顶栏 -->
+        <!--            <header
+                      v-show="loadStatus == 3 && topItems.length > 0"
+                      class="subheader"
+                    >
+                      <div
+                        v-for="item in topItems"
+                        :key="item.index_name"
+                        class="top-item"
+                        @click="clickTab(item.index_name)"
+                        @contextmenu.prevent="topItemsMenu(item, $event)"
+                      >
+                        <el-tooltip
+                          effect="dark"
+                          placement="top-start"
+                          :content="item.remark_name ? item.remark_name : item.name"
+                        >
+                          <div class="avatar">
+                            <span v-show="!item.avatar">
+                              {{
+                                (item.remark_name
+                                    ? item.remark_name
+                                    : item.name
+                                ).substr(0, 1)
+                              }}
+                            </span>
+                            <img
+                              v-show="item.avatar"
+                              :src="item.avatar"
+                              :onerror="$store.state.detaultAvatar"
+                            />
+                          </div>
+                        </el-tooltip>
+
+                        <div
+                          class="name"
+                          :class="{ active: index_name == item.index_name }"
+                        >
+                          {{ item.remark_name ? item.remark_name : item.name }}
+                        </div>
+                      </div>
+                    </header>-->
+
+        <!-- 对话列表栏 -->
+        <el-scrollbar ref="menusScrollbar" tag="section" class="full-height" :native="false">
+            <el-main class="main">
+                <p v-show="loadStatus == 2" class="empty-data">
+                    <i class="el-icon-loading"></i> 数据加载中...
+                </p>
+
+                <p v-show="loadStatus == 3 && talkNum == 0" class="empty-data">暂无聊天消息</p>
+
+                <p v-show="loadStatus == 3 && talkNum > 0" class="main-menu">
+                    <span class="title">消息记录 ({{ talkNum }})</span>
+                </p>
+
+                <p v-show="loadStatus == 4" style="text-align: center">
+                    数据加载失败，请点击重试！
+                </p>
+
+                <!-- 对话列表 -->
+                <template v-if="loadStatus != 3">
+                    <div
+                        v-for="item in sessionList"
+                        :key="item.id"
+                        class="talk-item pointer"
+                        :class="{ active: index_name === item.account }"
+                        @click="handleClickSession(item.account)"
+                        @contextmenu.prevent="talkItemsMenu(item, $event)"
+                    >
+                        <div class="avatar-box">
+                            <span v-show="!item.avatar">
+                                {{ (item.alias ? item.alias : item.nick).substr(0, 1) }}
+                            </span>
+                            <img
+                                v-show="item.avatar"
+                                :src="item.avatar"
+                                :onerror="$store.state.detaultAvatar"
+                            />
+                            <div
+                                v-show="item.is_top == 0"
+                                class="top-mask"
+                                @click.stop="topChatItem(item)"
+                            >
+                                <i class="el-icon-top"></i>
+                            </div>
+                        </div>
+                        <div class="card-box">
+                            <div class="title">
+                                <div class="card-name">
+                                    <p class="nickname">
+                                        {{ item.alias ? item.alias : item.nick }}
+                                    </p>
+                                    <div v-show="item.unread_num" class="larkc-tag">
+                                        {{ item.unread_num }}条未读
+                                    </div>
+                                    <div v-show="item.is_top" class="larkc-tag top">TOP</div>
+
+                                    <div v-show="item.is_robot" class="larkc-tag top">BOT</div>
+
+                                    <div v-show="item.talk_type == 2" class="larkc-tag group">
+                                        群组
+                                    </div>
+                                    <div v-show="item.is_disturb" class="larkc-tag disturb">
+                                        <i class="iconfont icon-xiaoximiandarao"></i>
+                                    </div>
+                                </div>
+                                <div class="card-time">
+                                    <u-time :value="String(Math.ceil(item.updateTime / 1000))" />
+                                </div>
+                            </div>
+                            <div class="content">
+                                <template v-if="index_name != item.index_name && item.draft_text">
+                                    <span class="draft-color">[草稿]</span>
+                                    <span>{{ item.draft_text }}</span>
+                                </template>
+                                <template v-else>
+                                    <template v-if="item.is_robot == 0">
+                                        <span
+                                            v-if="item.talk_type == 1"
+                                            :class="{
+                                                'online-color': item.is_online == 1
+                                            }"
+                                        >
+                                            [{{ item.is_online == 1 ? '在线' : '离线' }}]
+                                        </span>
+                                        <span v-else>[群消息]</span>
+                                    </template>
+
+                                    <span>{{ item?.lastMsg.text }}</span>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </el-main>
+        </el-scrollbar>
+    </el-container>
 </template>
+
 
 <style lang="scss" scoped>
 :deep(.el-scrollbar__wrap) {
@@ -527,7 +653,7 @@ export default {
 }
 
 .splitpanes.default-theme .splitpanes__pane {
-     background-color: white;
+    background-color: white;
 }
 
 .aside-box {

@@ -266,10 +266,8 @@
 </template>
 
 <script setup>
-// const props = defineProps()
 const store = useStore();
 const records = computed(() => {
-    console.log(store.state.dialogue.records);
     return store.state.dialogue.records;
 });
 </script>
@@ -495,6 +493,7 @@ export default {
                 this.loadRecord.status = 2;
 
                 // this.loadRecord.minRecord = res.data.record_id;
+                const el = document.getElementById('lumenChatPanel');
 
                 this.$nextTick(() => {
                     el.scrollTop = el.scrollHeight;
