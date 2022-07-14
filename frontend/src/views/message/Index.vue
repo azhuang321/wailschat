@@ -6,41 +6,25 @@ import { SESSION_LIST,CURRENT_SESSION_LIST } from '@/store/modules/nim/constants
 import { findTalkIndex } from '@/utils/talk';
 
 const { screeWidthDynamic } = useClientScreenEffect();
+const { computedWidth } = useLeftSessionListEffect();
 
 //左侧会话列表宽度计算
-const leftAsideMaxWidth = computed({
-    get:() => {
-        let width = (250 * 100)/(screeWidthDynamic.value-70);
-        if (width > 100) {
-            width = 100;
-        }
-        return width
-    }
-})
-
-const leftAsideMinWidth = computed({
-    get:() => {
-        let width = (60 * 100)/(screeWidthDynamic.value-70);
-        if (width > 100) {
-            width = 100;
-        }
-        return width
-    }
-})
+const leftAsideMaxWidth = computed(()=>computedWidth(screeWidthDynamic.value, 250))
+const leftAsideMinWidth = computed(()=>computedWidth(screeWidthDynamic.value, 60))
 
 let index_name = ref('');
 // 对话面板的传递参数
 let params = reactive({
-    talk_type: 0,
+    session_type: '',
     receiver_id: 0,
     nickname: '',
     is_robot: 0,
 })
 
-function clickSession(data){
-    index_name.value = data.index_name.value
-    params = Object.assign(params,data.params)
+function clickSession(childParams){
+    params = Object.assign(params,childParams)
 }
+
 </script>
 
 <script>
@@ -93,6 +77,22 @@ const useClientScreenEffect = () => {
         screeWidthDynamic
     };
 };
+
+//左侧会话列表最大最小宽度计算
+const useLeftSessionListEffect = () => {
+    const computedWidth = (screeWidthDynamic,targetWidth) =>{
+        let width = (targetWidth * 100)/(screeWidthDynamic-70);
+        if (width > 100) {
+            width = 100;
+        }
+        return width
+    }
+
+    return {
+        computedWidth
+    }
+
+}
 
 export default {
     name: 'MessagePage',
@@ -495,7 +495,7 @@ export default {
                 <pane :size="100 - leftAsideMaxWidth">
                     <!-- 聊天面板容器 -->
                     <el-main class="ov-hidden full-height no-padding">
-                        <WelcomeModule v-if="index_name === ''" />
+                        <WelcomeModule v-if="params.nickname === ''" />
                         <TalkPanel
                             v-else
                             class="full-height"

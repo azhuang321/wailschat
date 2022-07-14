@@ -36,7 +36,9 @@ export default {
         <el-container class="main-layout" :class="{ 'full-mode': themeMode }">
             <!-- 左侧导航栏-->
             <el-aside width="70px" class="side-edge">
-                <LeftAside :tab-name="tabName" />
+                <el-scrollbar>
+                    <LeftAside :tab-name="tabName" />
+                </el-scrollbar>
             </el-aside>
             <!-- 右侧聊天相关-->
             <el-main class="no-padding" style="background: white">

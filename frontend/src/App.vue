@@ -1,8 +1,7 @@
 <template>
     <div id="app">
-        <router-view v-if="showView"/>
+        <router-view v-if="showView" />
     </div>
-
 </template>
 <script>
 import dayjs from 'dayjs';
@@ -19,27 +18,22 @@ import 'dayjs/plugin/weekYear.js';
 import escapeHtml from 'escape-html';
 // import '';
 
-
 export default {
     name: 'App',
-    data () {
+    data() {
         return {
             // 用于点击当前页的router时，刷新当前页
             showView: true
         };
     },
-    mounted () {
-
-    },
+    mounted() {},
     methods: {
         // 刷新当前路由方法
-        refreshView () {
+        refreshView() {
             this.showView = false;
             this.$nextTick(() => (this.showView = true));
         }
     }
 };
-
 </script>
-<script setup>
-</script>
+<style lang="scss" scoped></style>

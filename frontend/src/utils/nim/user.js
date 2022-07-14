@@ -40,7 +40,7 @@ export const getTeams = async (teamIds = []) => {
     });
 };
 
-// 获取会话列表 todo 统一 account 与 id
+// 获取会话列表
 export const getSessionList = async () => {
     let sessionServerList = [];
     const teamIds = [];
@@ -64,20 +64,23 @@ export const getSessionList = async () => {
                     const friendList = await getFriendList();
                     const teams = await getTeams(teamIds);
 
-                    sessionServerList.map((val1, index) => {
-                        if (val1.session_type === 'team') {
+                    sessionServerList.map((val, index) => {
+                        if (val.session_type === 'team') {
                             for (let i = 0; i < teams.length; i++) {
-                                if (teams[i].teamId === val1.id) {
-                                    sessionServerList[index] = Object.assign(teams[i], val1);
+                                if (teams[i].teamId === val.id) {
+                                    sessionServerList[index] = Object.assign(teams[i], val);
+                                    teams.splice(i, 1);
                                     continue;
                                 }
                             }
                         }
-                        if (val1.session_type === 'p2p') {
-                            console.log(friendList);
+                        if (val.session_type === 'p2p') {
                             for (let i = 0; i < friendList.length; i++) {
-                                if (friendList[i].account === val1.id) {
-                                    sessionServerList[index] = Object.assign(friendList[i], val1);
+                                if (friendList[i].account === val.id) {
+                                    friendList[i].name = friendList[i].alias
+                                        ? friendList[i].alias
+                                        : friendList[i].nick;
+                                    sessionServerList[index] = Object.assign(friendList[i], val);
                                     friendList.splice(i, 1);
                                     continue;
                                 }

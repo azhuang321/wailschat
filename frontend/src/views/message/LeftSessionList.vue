@@ -1,11 +1,60 @@
 <script setup>
-import { useStore } from "vuex";
-import { findTalkIndex } from "@/utils/talk";
 import { CURRENT_SESSION_LIST } from "@/store/modules/nim/constants";
 
 const store = useStore();
+const emit = defineEmits(['clickSession'])
+
 const sessionList = computed(() => store.state.nim.sessionList);
+
+const {params,clickSession} = useClickSessionEffect()
+
+useSessionListEffect()
+
+//子组件向父级传值
+function handleClickSession(account) {
+    clickSession(account)
+    emit('clickSession', params)
+}
+
+//todo 去掉
 let index_name = ref('');
+
+
+
+
+</script>
+<script>
+//获取对话列表
+import { mapGetters, mapState, useStore } from "vuex";
+import { getSessionList } from "@/utils/nim/user";
+import { CURRENT_SESSION_LIST, SESSION_LIST } from '@/store/modules/nim/constants';
+import { ElNotification } from "element-plus";
+import UTime from "@/views/message/utime.vue";
+import { findTalkIndex, getCacheIndexName } from "@/utils/talk";
+import { Plus, Search } from "@element-plus/icons-vue";
+import { beautifyTime } from "@/utils/functions";
+import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api/chat";
+import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
+import { ServeSecedeGroup } from "@/api/group";
+
+//获取左侧会话列表
+const useSessionListEffect = () => {
+    const store = useStore();
+    getSessionList()
+        .then(res => {
+            store.dispatch({
+                type: SESSION_LIST,
+                session: res
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            ElNotification({
+                type: 'error',
+                message: '获取对话列表失败'
+            });
+        });
+};
 
 // 点击回话列表，渲染会话
 const useClickSessionEffect = () => {
@@ -25,8 +74,6 @@ const useClickSessionEffect = () => {
         if (index == -1) {
             //todo 判断
         }
-
-        index_name.value = account
 
         //todo 区分群组
         params.talk_type = 1;
@@ -55,53 +102,10 @@ const useClickSessionEffect = () => {
     }
 }
 
-const {params,clickSession} = useClickSessionEffect()
-
-useSessionListEffect()
-
-//子组件向父级传值
-const emit = defineEmits(['clickSession'])
-function handleClickSession(account) {
-    clickSession(account)
-    emit('clickSession', {index_name,params})
-}
 
 
 
 
-</script>
-<script>
-//获取对话列表
-import { mapGetters, mapState, useStore } from "vuex";
-import { getSessionList } from "@/utils/nim/user";
-import { SESSION_LIST } from "@/store/modules/nim/constants";
-import { ElNotification } from "element-plus";
-import UTime from "@/views/message/utime.vue";
-import { findTalkIndex, getCacheIndexName } from "@/utils/talk";
-import { Plus, Search } from "@element-plus/icons-vue";
-import { beautifyTime } from "@/utils/functions";
-import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api/chat";
-import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
-import { ServeSecedeGroup } from "@/api/group";
-
-//获取左侧会话列表
-const useSessionListEffect = () => {
-    const store = useStore();
-    getSessionList()
-        .then(res => {
-            store.dispatch({
-                type: SESSION_LIST,
-                session: res
-            });
-        })
-        .catch(err => {
-            console.log(err)
-            ElNotification({
-                type: 'error',
-                message: '获取对话列表失败'
-            });
-        });
-};
 const title = document.title;
 
 export default {
@@ -161,7 +165,7 @@ export default {
         },
         // 当前对话好友在线状态
         isFriendOnline() {
-            const index = findTalkIndex(this.index_name);
+            // const index = findTalkIndex(this.index_name);
             // return index >= 0 && this.talks[index].is_online == 1;
         }
     },
@@ -407,9 +411,9 @@ export default {
                 friend_id: item.receiver_id
             }).then(({ code }) => {
                 if (code == 200) {
-                    if (this.index_name == item.index_name) {
-                        this.clearTalk();
-                    }
+                    // if (this.index_name == item.index_name) {
+                    //     this.clearTalk();
+                    // }
 
                     this.$store.commit('REMOVE_TALK_ITEM', item.index_name);
                 }
@@ -422,9 +426,9 @@ export default {
                 group_id: item.receiver_id
             }).then(({ code }) => {
                 if (code == 200) {
-                    if (this.index_name == item.index_name) {
-                        this.clearTalk();
-                    }
+                    // if (this.index_name == item.index_name) {
+                    //     this.clearTalk();
+                    // }
 
                     this.$store.commit('REMOVE_TALK_ITEM', item.index_name);
                 }
@@ -508,47 +512,47 @@ export default {
         </el-header>
 
         <!-- 置顶栏 -->
-        <!--            <header
-                      v-show="loadStatus == 3 && topItems.length > 0"
-                      class="subheader"
-                    >
-                      <div
-                        v-for="item in topItems"
-                        :key="item.index_name"
-                        class="top-item"
-                        @click="clickTab(item.index_name)"
-                        @contextmenu.prevent="topItemsMenu(item, $event)"
-                      >
-                        <el-tooltip
-                          effect="dark"
-                          placement="top-start"
-                          :content="item.remark_name ? item.remark_name : item.name"
-                        >
-                          <div class="avatar">
-                            <span v-show="!item.avatar">
-                              {{
-                                (item.remark_name
-                                    ? item.remark_name
-                                    : item.name
-                                ).substr(0, 1)
-                              }}
-                            </span>
-                            <img
-                              v-show="item.avatar"
-                              :src="item.avatar"
-                              :onerror="$store.state.detaultAvatar"
-                            />
-                          </div>
-                        </el-tooltip>
+        <header
+          v-show="loadStatus != 3 && topItems.length == 0"
+          class="subheader"
+        >
+          <div
+            v-for="item in topItems"
+            :key="item.index_name"
+            class="top-item"
+            @click="clickTab(item.index_name)"
+            @contextmenu.prevent="topItemsMenu(item, $event)"
+          >
+            <el-tooltip
+              effect="dark"
+              placement="top-start"
+              :content="item.remark_name ? item.remark_name : item.name"
+            >
+              <div class="avatar">
+                <span v-show="!item.avatar">
+                  {{
+                    (item.remark_name
+                        ? item.remark_name
+                        : item.name
+                    ).substr(0, 1)
+                  }}
+                </span>
+                <img
+                  v-show="item.avatar"
+                  :src="item.avatar"
+                  :onerror="$store.state.detaultAvatar"
+                />
+              </div>
+            </el-tooltip>
 
-                        <div
-                          class="name"
-                          :class="{ active: index_name == item.index_name }"
-                        >
-                          {{ item.remark_name ? item.remark_name : item.name }}
-                        </div>
-                      </div>
-                    </header>-->
+            <div
+              class="name"
+              :class="{ active: params.nickname == item.index_name }"
+            >
+              {{ item.remark_name ? item.remark_name : item.name }}
+            </div>
+          </div>
+        </header>
 
         <!-- 对话列表栏 -->
         <el-scrollbar ref="menusScrollbar" tag="section" class="full-height" :native="false">
@@ -579,8 +583,7 @@ export default {
                     >
                         <div class="avatar-box">
                             <span v-show="!item.avatar">
-<!--                                todo 统一群名称 与用户名称-->
-                                {{ (item.alias ? item.alias : item.name).substr(0, 1) }}
+                                {{ (item.name ? item.name : item.nick).substr(0, 1) }}
                             </span>
                             <img
                                 v-show="item.avatar"
@@ -599,7 +602,7 @@ export default {
                             <div class="title">
                                 <div class="card-name">
                                     <p class="nickname">
-                                        {{ item.alias ? item.alias : item.nick }}
+                                        {{ item.name ? item.name : item.nick }}
                                     </p>
                                     <div v-show="item.unread_num" class="larkc-tag">
                                         {{ item.unread_num }}条未读
@@ -608,7 +611,7 @@ export default {
 
                                     <div v-show="item.is_robot" class="larkc-tag top">BOT</div>
 
-                                    <div v-show="item.talk_type == 2" class="larkc-tag group">
+                                    <div v-show="item.session_type == 'team'" class="larkc-tag group">
                                         群组
                                     </div>
                                     <div v-show="item.is_disturb" class="larkc-tag disturb">
@@ -672,11 +675,15 @@ export default {
         padding: 0 15px;
 
         .from-search {
-            flex: 1 1;
-            flex-shrink: 0;
-
             :deep(.el-input .el-input__wrapper) {
                 border-radius: 20px;
+                font-size: 12px;
+                padding: 1px 0;
+            }
+            :deep(.el-input__prefix){
+                padding-left: 8px ;
+                font-size: 20px;
+
             }
         }
 
