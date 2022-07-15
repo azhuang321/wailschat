@@ -1,55 +1,12 @@
-<template>
-    <el-header id="panel-header">
-        <div class="module left-module">
-            <span
-                v-show="params.is_robot == 0"
-                class="icon-badge"
-                :class="{ 'red-color': params.talk_type == 1 }"
-            >
-                {{ params.talk_type == 1 ? '好友' : '群组' }}
-            </span>
-
-            <span class="nickname">{{ params.nickname }}</span>
-            <span v-show="params.talk_type == 2" class="num">({{ groupNum }})</span>
-        </div>
-
-        <div v-show="params.talk_type == 1 && params.is_robot == 0" class="module center-module">
-            <p class="online">
-                <span v-show="isOnline" class="online-status"></span>
-                <span>{{ isOnline ? '在线' : '离线' }}</span>
-            </p>
-            <p v-show="isKeyboard" class="keyboard-status">对方正在输入 ...</p>
-        </div>
-
-        <div class="module right-module">
-            <el-tooltip content="历史消息" placement="top">
-                <p v-show="params.is_robot == 0">
-                    <i class="el-icon-time" @click="triggerEvent('history')"></i>
-                </p>
-            </el-tooltip>
-            <el-tooltip content="群公告" placement="top">
-                <p v-show="params.talk_type == 2">
-                    <i class="iconfont icon-gonggao2" @click="triggerEvent('notice')"></i>
-                </p>
-            </el-tooltip>
-            <el-tooltip content="群设置" placement="top">
-                <p v-show="params.talk_type == 2">
-                    <i class="el-icon-setting" @click="triggerEvent('setting')"></i>
-                </p>
-            </el-tooltip>
-        </div>
-    </el-header>
-</template>
 <script setup>
 const props = defineProps({
     data: {
         type: Object,
         default: () => {
             return {
-                talk_type: 0,
-                receiver_id: 0,
-                params: 0,
-                nickname: ''
+                session_type: '',
+                session_name: '',
+                receiver_id: 0
             };
         }
     },
@@ -108,6 +65,51 @@ export default {
     }
 };
 </script>
+<template>
+    <el-header id="panel-header">
+        <div class="module left-module">
+            <span
+                v-show="params.is_robot == 0"
+                class="icon-badge"
+                :class="{ 'red-color': params.session_type === 'p2p' }"
+            >
+                {{ params.session_type === 'p2p' ? '好友' : '群组' }}
+            </span>
+
+            <span class="nickname">{{ params.session_name }}</span>
+            <span v-show="params.session_type === 'team'" class="num">({{ groupNum }})</span>
+        </div>
+
+        <div
+            v-show="params.session_type === 'p2p' && params.is_robot == 0"
+            class="module center-module"
+        >
+            <p class="online">
+                <span v-show="isOnline" class="online-status"></span>
+                <span>{{ isOnline ? '在线' : '离线' }}</span>
+            </p>
+            <p v-show="isKeyboard" class="keyboard-status">对方正在输入 ...</p>
+        </div>
+
+        <div class="module right-module">
+            <el-tooltip content="历史消息" placement="top">
+                <p v-show="params.is_robot == 0">
+                    <i class="el-icon-time" @click="triggerEvent('history')"></i>
+                </p>
+            </el-tooltip>
+            <el-tooltip content="群公告" placement="top">
+                <p v-show="params.session_type === 'team'">
+                    <i class="iconfont icon-gonggao2" @click="triggerEvent('notice')"></i>
+                </p>
+            </el-tooltip>
+            <el-tooltip content="群设置" placement="top">
+                <p v-show="params.session_type === 'team'">
+                    <i class="el-icon-setting" @click="triggerEvent('setting')"></i>
+                </p>
+            </el-tooltip>
+        </div>
+    </el-header>
+</template>
 <style lang="scss" scoped>
 #panel-header {
     display: flex;

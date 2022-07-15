@@ -7,23 +7,14 @@ import { findTalkIndex } from '@/utils/talk';
 
 const { screeWidthDynamic } = useClientScreenEffect();
 const { computedWidth } = useLeftSessionListEffect();
+const { params,handClickSession } = useSessionPanelEffect();
 
 //左侧会话列表宽度计算
 const leftAsideMaxWidth = computed(()=>computedWidth(screeWidthDynamic.value, 250))
 const leftAsideMinWidth = computed(()=>computedWidth(screeWidthDynamic.value, 60))
 
 let index_name = ref('');
-// 对话面板的传递参数
-let params = reactive({
-    session_type: '',
-    receiver_id: 0,
-    nickname: '',
-    is_robot: 0,
-})
 
-function clickSession(childParams){
-    params = Object.assign(params,childParams)
-}
 
 </script>
 
@@ -92,6 +83,18 @@ const useLeftSessionListEffect = () => {
         computedWidth
     }
 
+}
+
+//对话面板参数
+const useSessionPanelEffect = () => {
+    // 对话面板的传递参数
+    let params = reactive({})
+    const handClickSession = (childParams) => {
+        params = Object.assign(params,childParams)
+    }
+    return {
+        params,handClickSession
+    }
 }
 
 export default {
@@ -488,14 +491,14 @@ export default {
                 <pane :size="leftAsideMaxWidth" :max-size="leftAsideMaxWidth" :min-size="leftAsideMinWidth">
                     <!-- 左侧侧边栏 -->
                     <el-aside width="100%" min-width="60px" class="aside-box">
-                        <LeftSessionList @clickSession="clickSession" />
+                        <LeftSessionList @clickSession="handClickSession" />
                     </el-aside>
                 </pane>
                 <!-- 右侧聊天窗口-->
                 <pane :size="100 - leftAsideMaxWidth">
                     <!-- 聊天面板容器 -->
                     <el-main class="ov-hidden full-height no-padding">
-                        <WelcomeModule v-if="params.nickname === ''" />
+                        <WelcomeModule v-if="params?.session_name === undefined" />
                         <TalkPanel
                             v-else
                             class="full-height"

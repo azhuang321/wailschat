@@ -3,7 +3,8 @@ import {
     getFriends,
     getUsers,
     getServerSessions,
-    getLocalTeams
+    getLocalTeams,
+    getStickTopSessions
 } from '@/utils/nim/index';
 
 const nim = await getNimInstance();
@@ -40,55 +41,73 @@ export const getTeams = async (teamIds = []) => {
     });
 };
 
+// 处理会话列表
+async function dealSessionList(sessionList = []) {
+    if (sessionList.length === 0) {
+        return [];
+    }
+    const teamIds = [];
+    sessionList.map(res => {
+        res.session_id = res.id;
+        if (res.id.startsWith('team-')) {
+            res.id = res.id.split('team-')[1];
+            res.session_type = 'team';
+            teamIds.push(res.id);
+        }
+        if (res.id.startsWith('p2p-')) {
+            res.id = res.id.split('p2p-')[1];
+            res.session_type = 'p2p';
+        }
+    });
+    //todo 发现不存在的用户，需要去服务器同步
+    const friendList = await getFriendList();
+    const teams = await getTeams(teamIds);
+
+    sessionList.map((val, index) => {
+        if (val.session_type === 'team') {
+            for (let i = 0; i < teams.length; i++) {
+                if (teams[i].teamId === val.id) {
+                    sessionList[index] = Object.assign(teams[i], val);
+                    teams.splice(i, 1);
+                    continue;
+                }
+            }
+        }
+        if (val.session_type === 'p2p') {
+            for (let i = 0; i < friendList.length; i++) {
+                if (friendList[i].account === val.id) {
+                    friendList[i].name = friendList[i].alias
+                        ? friendList[i].alias
+                        : friendList[i].nick;
+                    sessionList[index] = Object.assign(friendList[i], val);
+                    friendList.splice(i, 1);
+                    continue;
+                }
+            }
+        }
+    });
+    return sessionList;
+}
+
 // 获取会话列表
 export const getSessionList = async () => {
-    let sessionServerList = [];
-    const teamIds = [];
     return new Promise((resolve, reject) => {
         getServerSessions()
             .then(async res => {
-                if (res.sessionList.length > 0) {
-                    res.sessionList.map(res => {
-                        if (res.id.startsWith('team-')) {
-                            res.id = res.id.split('team-')[1];
-                            res.session_type = 'team';
-                            teamIds.push(res.id);
-                        }
-                        if (res.id.startsWith('p2p-')) {
-                            res.id = res.id.split('p2p-')[1];
-                            res.session_type = 'p2p';
-                        }
-                    });
-                    sessionServerList = res.sessionList;
-                    //todo 发现不存在的用户，需要去服务器同步
-                    const friendList = await getFriendList();
-                    const teams = await getTeams(teamIds);
+                resolve(dealSessionList(res.sessionList));
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
+};
 
-                    sessionServerList.map((val, index) => {
-                        if (val.session_type === 'team') {
-                            for (let i = 0; i < teams.length; i++) {
-                                if (teams[i].teamId === val.id) {
-                                    sessionServerList[index] = Object.assign(teams[i], val);
-                                    teams.splice(i, 1);
-                                    continue;
-                                }
-                            }
-                        }
-                        if (val.session_type === 'p2p') {
-                            for (let i = 0; i < friendList.length; i++) {
-                                if (friendList[i].account === val.id) {
-                                    friendList[i].name = friendList[i].alias
-                                        ? friendList[i].alias
-                                        : friendList[i].nick;
-                                    sessionServerList[index] = Object.assign(friendList[i], val);
-                                    friendList.splice(i, 1);
-                                    continue;
-                                }
-                            }
-                        }
-                    });
-                    resolve(sessionServerList);
-                }
+// 获取置顶会话列表
+export const getTopSessionList = async () => {
+    return new Promise((resolve, reject) => {
+        getStickTopSessions()
+            .then(res => {
+                resolve(dealSessionList(res));
             })
             .catch(err => {
                 reject(err);

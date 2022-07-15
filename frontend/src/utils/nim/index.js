@@ -210,3 +210,36 @@ export const getHistoryMsgs = async () => {
         });
     });
 };
+
+// 获取置顶会话列表 http://dev.yunxin.163.com/docs/interface/%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AFWeb%E7%AB%AF/NIMSDK-Web/NIM.html#getStickTopSessions__anchor
+export const getStickTopSessions = async (isShowDelete = false) => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        nim.getStickTopSessions({
+            findDelete: isShowDelete,
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
+    });
+};
+
+// 新增置顶会话 http://dev.yunxin.163.com/docs/interface/%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AFWeb%E7%AB%AF/NIMSDK-Web/NIM.html#addStickTopSession__anchor
+export const addStickTopSession = async id => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        nim.addStickTopSession({
+            id: id,
+            topCustom: '',
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
+    });
+};

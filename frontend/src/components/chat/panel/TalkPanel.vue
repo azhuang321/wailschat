@@ -497,8 +497,6 @@ export default {
 
                 this.$nextTick(() => {
                     el.scrollTop = el.scrollHeight;
-                    console.log(el.scrollTop);
-                    console.log(el.scrollHeight);
 
                     // if (data.record_id == 0) {
                     //     el.scrollTop = el.scrollHeight;
