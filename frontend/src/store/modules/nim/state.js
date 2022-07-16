@@ -4,5 +4,6 @@ export const state = () => ({
     connectStatus: c.CONNECT_STATUS_ENUM.disconnect,
     sessionList: [],
     connectNotification: '',
-    currentSessionList: []
+    currentSessionList: [],
+    topSessionList: []
 });

@@ -8,14 +8,14 @@ const sessionList = computed(() => store.state.nim.sessionList);
 
 const {params,handleClickSession} = useClickSessionEffect(emit)
 
-useSessionListEffect()
+// useSessionListEffect()
 
-const {topList} = useTopListEffect()
+const topSessionList = computed(() => store.state.nim.topSessionList);
+
+useTopListEffect()
 
 //todo 去掉
 let index_name = ref('');
-
-
 
 
 </script>
@@ -23,7 +23,7 @@ let index_name = ref('');
 //获取对话列表
 import { mapGetters, mapState, useStore } from "vuex";
 import { getSessionList, getTopSessionList } from '@/utils/nim/user';
-import { CURRENT_SESSION_LIST, SESSION_LIST } from '@/store/modules/nim/constants';
+import { CURRENT_SESSION_LIST, SESSION_LIST,TOP_SESSION_LIST } from '@/store/modules/nim/constants';
 import { ElNotification } from "element-plus";
 import UTime from "@/views/message/utime.vue";
 import { findTalkIndex, getCacheIndexName } from "@/utils/talk";
@@ -109,17 +109,15 @@ const useClickSessionEffect = (emit) => {
 
 //置顶列表
 const useTopListEffect = () => {
-    const topList = reactive([])
+    const store = useStore()
     // addStickTopSession('team-5555897456')
+    // addStickTopSession('p2p-azhuang1')
     getTopSessionList().then(res => {
-        topList.length = 0;
-        for(let i=0;i<11; i++){
-            topList.push(...res)
-        }
+        store.dispatch({
+            type:TOP_SESSION_LIST,
+            topSessionList: res
+        })
     })
-    return {
-        topList
-    }
 }
 
 
@@ -532,12 +530,12 @@ export default {
         <el-main class='no-padding'>
             <!-- 置顶栏 -->
             <header
-                v-show="topList.length !== 0"
+                v-show="topSessionList.length !== 0"
                 class="subheader"
             >
                 <span class="subheader-title">置顶聊天</span>
                 <div
-                    v-for="item in topList"
+                    v-for="item in topSessionList"
                     :key="item.index_name"
                     class="top-item"
                     @click="clickTab(item.index_name)"

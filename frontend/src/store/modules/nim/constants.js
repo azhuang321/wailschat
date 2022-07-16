@@ -15,3 +15,6 @@ export const CONNECT_NOTIFICATION = 'CONNECT_NOTIFICATION';
 
 //当前聊天会话列表
 export const CURRENT_SESSION_LIST = 'CURRENT_SESSION_LIST';
+
+// 置顶会话列表
+export const TOP_SESSION_LIST = 'TOP_SESSION_LIST';

@@ -165,6 +165,20 @@ export const getLocalTeams = async teamIds => {
         });
     });
 };
+// 获取群列表 http://dev.yunxin.163.com/docs/interface/%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AFWeb%E7%AB%AF/NIMSDK-Web/NIM.html#getTeams__anchor
+export const getTeams = async () => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        nim.getTeams({
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
+    });
+};
 
 // 发送消息 todo 完善发送设置
 export const sendText = async content => {
