@@ -32,6 +32,7 @@ import { beautifyTime } from "@/utils/functions";
 import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api/chat";
 import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
 import { ServeSecedeGroup } from "@/api/group";
+import { addStickTopSession } from "@/utils/nim";
 
 //获取左侧会话列表
 const useSessionListEffect = () => {
@@ -109,9 +110,12 @@ const useClickSessionEffect = (emit) => {
 //置顶列表
 const useTopListEffect = () => {
     const topList = reactive([])
+    // addStickTopSession('team-5555897456')
     getTopSessionList().then(res => {
         topList.length = 0;
-        topList.push(...res)
+        for(let i=0;i<11; i++){
+            topList.push(...res)
+        }
     })
     return {
         topList
@@ -531,6 +535,7 @@ export default {
                 v-show="topList.length !== 0"
                 class="subheader"
             >
+                <span class="subheader-title">置顶聊天</span>
                 <div
                     v-for="item in topList"
                     :key="item.index_name"
@@ -546,10 +551,7 @@ export default {
                         <div class="avatar">
                 <span v-show="!item.avatar">
                   {{
-                        (item.remark_name
-                                ? item.remark_name
-                                : item.name
-                        ).substr(0, 1)
+                        (item.name).substr(0, 1)
                     }}
                 </span>
                             <img
@@ -571,6 +573,7 @@ export default {
 
             <!-- 对话列表栏 -->
             <el-scrollbar ref="menusScrollbar" tag="section" class="full-height" :native="false">
+                <span class="session-title">会话列表</span>
                 <el-main class="main">
                     <p v-show="loadStatus == 2" class="empty-data">
                         <i class="el-icon-loading"></i> 数据加载中...
@@ -598,7 +601,7 @@ export default {
                         >
                             <div class="avatar-box">
                             <span v-show="!item.avatar">
-                                {{ (item.name ? item.name : item.nick).substr(0, 1) }}
+                                {{ (item.name).substr(0, 1) }}
                             </span>
                                 <img
                                     v-show="item.avatar"
@@ -676,6 +679,16 @@ export default {
 .splitpanes.default-theme .splitpanes__pane {
     background-color: white;
 }
+.el-scrollbar__view{
+    .session-title{
+        width: 100%;
+        padding: 5px 10px;
+        margin: 8px 0 0;
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+    }
+}
 
 .aside-box {
     position: relative;
@@ -741,19 +754,30 @@ export default {
 
     .subheader {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-flow: row wrap;
         padding: 5px 8px;
         overflow: hidden;
         flex-shrink: 0;
-        justify-content: flex-start;
+        justify-content: space-between;
         background: aliceblue;
+        //todo 间距不对齐
+        &::after {
+            content: "";
+            flex: auto;
+        }
+        &-title{
+            width: 100%;
+            padding: 5px 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
 
         .top-item {
             flex-basis: 41px;
             flex-shrink: 0;
             height: 50px;
-            margin: 3px 0 3px 2px;
+            margin: 3px 2px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -987,15 +1011,15 @@ export default {
     }
 }
 
-@media screen and (max-width: 800px) {
-    .aside-box {
-        .subheader {
-            display: none;
-        }
-
-        .card-box .larkc-tag {
-            display: none;
-        }
-    }
-}
+//@media screen and (max-width: 800px) {
+//    .aside-box {
+//        .subheader {
+//            display: none;
+//        }
+//
+//        .card-box .larkc-tag {
+//            display: none;
+//        }
+//    }
+//}
 </style>

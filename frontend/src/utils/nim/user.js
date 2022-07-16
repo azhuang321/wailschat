@@ -33,7 +33,7 @@ export const getTeams = async (teamIds = []) => {
     return new Promise((resolve, reject) => {
         getLocalTeams(teamIds)
             .then(teams => {
-                resolve(teams.teams);
+                resolve(teams?.teams ?? []);
             })
             .catch(err => {
                 reject(err);
