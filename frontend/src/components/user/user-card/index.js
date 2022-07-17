@@ -19,7 +19,9 @@ const createMount = options => {
             options.editRemarkCallback && options.editRemarkCallback(data);
         }
     });
+    //todo 去掉
     registerDirectives(app);
+    //todo 按需引入
     return app.use(ElementPlus).mount(mountNode);
 };
 

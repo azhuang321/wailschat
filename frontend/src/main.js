@@ -14,7 +14,7 @@ import registerDirectives from './core/directives'; // 自定义指令
 // import './core/global-component'; // 全局插件
 
 import { myPlugin } from '@/components/user/user-card';
-
+import { directive, menusEvent, Vue3Menus } from 'vue3-menus';
 import {
     AudioMessage,
     CodeMessage,
@@ -54,5 +54,8 @@ registerDirectives(app);
 // app.component(LocationMessage.name, LocationMessage);
 
 app.use(myPlugin);
+app.component('Vue3Menus', Vue3Menus); // 只注册组件
+app.directive('menus', directive); // 只注册指令
+// app.config.globalProperties.$menusEvent = menusEvent; // 只绑定方法
 
 app.use(router).use(store).mount('#app');

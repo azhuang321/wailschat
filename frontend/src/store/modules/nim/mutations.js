@@ -15,6 +15,7 @@ export const mutations = {
         state.currentSessionList.push(payload.currentSession);
     },
     [c.TOP_SESSION_LIST](state, payload) {
+        state.topSessionList.length = 0;
         state.topSessionList.push(...payload.topSessionList);
     }
 };

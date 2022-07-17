@@ -1,4 +1,19 @@
 import * as c from './constants';
+import loadsh from 'loadsh';
+
+// 合并数组并去重
+function concatAndUniqArr(arr1 = [], arr2 = []) {
+    if (arr1.length === 0 && arr2.length === 0) {
+        return [];
+    }
+    if (arr1.length === 0 && arr2.length > 0) {
+        return arr2;
+    }
+    if (arr1.length > 0 && arr2.length === 0) {
+        return arr1;
+    }
+    return loadsh.uniqBy(loadsh.concat(arr1, arr2), 'id');
+}
 
 export const actions = {
     // 连接状态
@@ -34,12 +49,10 @@ export const actions = {
     },
     // 置顶会话列表
     [c.TOP_SESSION_LIST]({ state, commit }, payload) {
-        console.log(payload);
-        // for (let i = 0; i < state.topSessionList.length; i++) {
-        //     if (state.topSessionList[i].session_id === payload.topSessionList.session_id) {
-        //         return;
-        //     }
-        // }
+        payload.topSessionList = concatAndUniqArr(
+            payload.topSessionList,
+            toRaw(state.topSessionList)
+        );
         commit(payload);
     }
 };

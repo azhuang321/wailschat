@@ -1,10 +1,17 @@
 <script setup>
+// todo 去掉
 import { CURRENT_SESSION_LIST } from "@/store/modules/nim/constants";
-const defaultAvatar = import('@/assets/image/detault-avatar.jpg');
 
 
 const store = useStore();
 const emit = defineEmits(['clickSession'])
+
+// 置顶聊天
+const topSessionList = computed(() => store.state.nim.topSessionList);
+useTopListEffect()
+
+
+
 
 const sessionList = computed(() => store.state.nim.sessionList);
 
@@ -12,19 +19,16 @@ const {params,handleClickSession} = useClickSessionEffect(emit)
 
 // useSessionListEffect()
 
-const topSessionList = computed(() => store.state.nim.topSessionList);
 
-useTopListEffect()
+
+const test = (event, item) =>{
+
+}
+
+
 
 //todo 去掉
 let index_name = ref('');
-
-//todo 默认图像指令编写
-const test = async (event) =>{
-    const src = await defaultAvatar
-    console.log(src)
-    // event.target.src = defaultAvatar
-}
 
 
 </script>
@@ -42,6 +46,25 @@ import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api
 import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
 import { ServeSecedeGroup } from "@/api/group";
 import { addStickTopSession } from "@/utils/nim";
+//https://github.com/xfy520/vue3-menus
+import { menusEvent } from 'vue3-menus';
+
+//置顶列表
+const useTopListEffect = () => {
+    const store = useStore()
+    // addStickTopSession('team-5555897456')
+    // addStickTopSession('p2p-azhuang1')
+    getTopSessionList().then(res => {
+        store.dispatch({
+            type:TOP_SESSION_LIST,
+            topSessionList: res
+        })
+    }).catch(err => {
+        ElNotification.error({
+            message: '获取置顶列表失败'
+        });
+    });
+}
 
 //获取左侧会话列表
 const useSessionListEffect = () => {
@@ -115,23 +138,7 @@ const useClickSessionEffect = (emit) => {
     }
 }
 
-//置顶列表
-const useTopListEffect = () => {
-    const store = useStore()
-    // addStickTopSession('team-5555897456')
-    // addStickTopSession('p2p-azhuang1')
-    getTopSessionList().then(res => {
-        console.log(res)
-        store.dispatch({
-            type:TOP_SESSION_LIST,
-            topSessionList: res
-        })
-    }).catch(err => {
-        ElNotification.error({
-            message: '获取置顶列表失败'
-        });
-    });
-}
+
 
 
 
@@ -374,19 +381,41 @@ export default {
 
         // 置顶栏右键菜单栏
         topItemsMenu(item, event) {
-            this.$contextmenu({
-                items: [
+            // https://github.com/xfy520/vue3-menus#方法方式使用
+            const menus = shallowRef({
+                menus: [
                     {
-                        label: item.is_top == 0 ? '会话置顶' : '取消置顶',
-                        icon: 'el-icon-top',
-                        onClick: () => {
-                            this.topChatItem(item);
+                        label: "返回(B)",
+                        tip: 'Alt+向左箭头',
+                        click: () => {
+                            window.history.back(-1);
+                        }
+                    },
+                    {
+                        label: "点击不关闭菜单",
+                        tip: '不关闭菜单',
+                        click: () => {
+                            return false;
                         }
                     }
-                ],
-                event: event,
-                zIndex: 3
+                ]
             });
+            console.log('right')
+            menusEvent(event, menus.value);
+            event.preventDefault();
+            // this.$contextmenu({
+            //     items: [
+            //         {
+            //             label: item.is_top == 0 ? '会话置顶' : '取消置顶',
+            //             icon: 'el-icon-top',
+            //             onClick: () => {
+            //                 this.topChatItem(item);
+            //             }
+            //         }
+            //     ],
+            //     event: event,
+            //     zIndex: 3
+            // });
 
             return false;
         },
@@ -551,7 +580,7 @@ export default {
                     v-for="item in topSessionList"
                     :key="item.id"
                     class="top-item"
-                    @click="clickTab(item.index_name)"
+                    @click.stop="clickTab(item.index_name)"
                     @contextmenu.prevent="topItemsMenu(item, $event)"
                 >
                     <el-tooltip
@@ -565,8 +594,7 @@ export default {
                             </span>
                             <img
                                 v-show="item.sessionInfo.avatar"
-                                :src="item.sessionInfo.avatar"
-                                :onerror="$store.state.detaultAvatar"
+                                v-lazyImg="{src:item.sessionInfo.avatar}"
                             />
                         </div>
                     </el-tooltip>
@@ -610,11 +638,11 @@ export default {
                         >
                             <div class="avatar-box">
                             <span v-show="!item.avatar">
-                                {{ (item.name).substr(0, 1) }}
+                                {{ (item.sessionInfo.name).substr(0, 1) }}
                             </span>
                                 <img
-                                    v-show="item.avatar"
-                                    :src="item.avatar"
+                                    v-show="item.sessionInfo.avatar"
+                                    :src="item.sessionInfo.avatar"
                                     :onerror="$store.state.detaultAvatar"
                                 />
                                 <div
