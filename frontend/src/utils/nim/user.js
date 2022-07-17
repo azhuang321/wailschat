@@ -61,7 +61,6 @@ async function dealSessionList(sessionList = []) {
     const friendList = await getFriendList();
     const teamIds = [];
     sessionList.map((val, index) => {
-        val.session_id = val.id;
         if (val.id.startsWith('team-')) {
             val.session_type = 'team';
             teamIds.push(val.id.split('team-')[1]);
@@ -73,7 +72,7 @@ async function dealSessionList(sessionList = []) {
                     friendList[i].name = friendList[i].alias
                         ? friendList[i].alias
                         : friendList[i].nick;
-                    sessionList[index] = Object.assign(friendList[i], val);
+                    sessionList[index].sessionInfo = friendList[i];
                     friendList.splice(i, 1);
                     continue;
                 }
@@ -85,7 +84,7 @@ async function dealSessionList(sessionList = []) {
         if (val.session_type === 'team') {
             for (let i = 0; i < teams.length; i++) {
                 if (teams[i].teamId === val.id.split('team-')[1]) {
-                    sessionList[index] = Object.assign(teams[i], val);
+                    sessionList[index].sessionInfo = teams[i];
                     teams.splice(i, 1);
                     continue;
                 }

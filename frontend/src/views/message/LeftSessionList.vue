@@ -1,5 +1,7 @@
 <script setup>
 import { CURRENT_SESSION_LIST } from "@/store/modules/nim/constants";
+const defaultAvatar = import('@/assets/image/detault-avatar.jpg');
+
 
 const store = useStore();
 const emit = defineEmits(['clickSession'])
@@ -16,6 +18,13 @@ useTopListEffect()
 
 //todo 去掉
 let index_name = ref('');
+
+//todo 默认图像指令编写
+const test = async (event) =>{
+    const src = await defaultAvatar
+    console.log(src)
+    // event.target.src = defaultAvatar
+}
 
 
 </script>
@@ -45,7 +54,6 @@ const useSessionListEffect = () => {
             });
         })
         .catch(err => {
-            console.log(err)
             ElNotification({
                 type: 'error',
                 message: '获取对话列表失败'
@@ -113,11 +121,16 @@ const useTopListEffect = () => {
     // addStickTopSession('team-5555897456')
     // addStickTopSession('p2p-azhuang1')
     getTopSessionList().then(res => {
+        console.log(res)
         store.dispatch({
             type:TOP_SESSION_LIST,
             topSessionList: res
         })
-    })
+    }).catch(err => {
+        ElNotification.error({
+            message: '获取置顶列表失败'
+        });
+    });
 }
 
 
@@ -536,7 +549,7 @@ export default {
                 <span class="subheader-title">置顶聊天</span>
                 <div
                     v-for="item in topSessionList"
-                    :key="item.index_name"
+                    :key="item.id"
                     class="top-item"
                     @click="clickTab(item.index_name)"
                     @contextmenu.prevent="topItemsMenu(item, $event)"
@@ -544,17 +557,15 @@ export default {
                     <el-tooltip
                         effect="dark"
                         placement="top-start"
-                        :content="item.remark_name ? item.remark_name : item.name"
+                        :content="item.sessionInfo.nick ? item.sessionInfo.nick : item.sessionInfo.name"
                     >
                         <div class="avatar">
-                <span v-show="!item.avatar">
-                  {{
-                        (item.name).substr(0, 1)
-                    }}
-                </span>
+                            <span v-show="!item.sessionInfo.avatar">
+                              {{(item.sessionInfo.nick ? item.sessionInfo.nick : item.sessionInfo.name).substr(0, 1) }}
+                            </span>
                             <img
-                                v-show="item.avatar"
-                                :src="item.avatar"
+                                v-show="item.sessionInfo.avatar"
+                                :src="item.sessionInfo.avatar"
                                 :onerror="$store.state.detaultAvatar"
                             />
                         </div>

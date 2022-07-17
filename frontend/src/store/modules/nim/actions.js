@@ -34,6 +34,7 @@ export const actions = {
     },
     // 置顶会话列表
     [c.TOP_SESSION_LIST]({ state, commit }, payload) {
+        console.log(payload);
         // for (let i = 0; i < state.topSessionList.length; i++) {
         //     if (state.topSessionList[i].session_id === payload.topSessionList.session_id) {
         //         return;
