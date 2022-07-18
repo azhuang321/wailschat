@@ -21,7 +21,7 @@ const {params,handleClickSession} = useClickSessionEffect(emit)
 
 
 
-const {topSessionMenus, topSessionIsOpen, topSessionRightClick, topSessionEventVal} = useTopSessionRightClickEffect()
+const {handleTopSessionClick} = useTopSessionRightClickEffect()
 
 
 
@@ -43,7 +43,7 @@ import { beautifyTime } from "@/utils/functions";
 import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api/chat";
 import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
 import { ServeSecedeGroup } from "@/api/group";
-import { addStickTopSession } from "@/utils/nim";
+import { addStickTopSession, deleteStickTopSession } from '@/utils/nim';
 //https://github.com/xfy520/vue3-menus
 import { menusEvent } from 'vue3-menus';
 import { Vue3Menus } from 'vue3-menus';
@@ -51,8 +51,8 @@ import { Vue3Menus } from 'vue3-menus';
 //置顶列表
 const useTopListEffect = () => {
     const store = useStore()
-    // addStickTopSession('team-5555897456')
-    // addStickTopSession('p2p-azhuang1')
+    addStickTopSession('team-5555897456')
+    addStickTopSession('p2p-azhuang1')
     getTopSessionList().then(res => {
         store.dispatch({
             type:TOP_SESSION_LIST,
@@ -137,36 +137,41 @@ const useClickSessionEffect = (emit) => {
     }
 }
 
-
+//置顶列表右击
 const useTopSessionRightClickEffect = () => {
-    const topSessionIsOpen = ref(false);
-    const topSessionEventVal = ref({});
-    function topSessionRightClick(event) {
-        console.log('click')
-        topSessionIsOpen.value = false;
-        nextTick(() => {
-            topSessionEventVal.value = event;
-            topSessionIsOpen.value = true;
-        })
+    const store = useStore()
+    const menus = shallowRef({
+        menus: [
+            {
+                label: "取消置顶",
+                icon:'<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8=""><path fill="currentColor" d="M544 805.888V168a32 32 0 1 0-64 0v637.888L246.656 557.952a30.72 30.72 0 0 0-45.312 0 35.52 35.52 0 0 0 0 48.064l288 306.048a30.72 30.72 0 0 0 45.312 0l288-306.048a35.52 35.52 0 0 0 0-48 30.72 30.72 0 0 0-45.312 0L544 805.824z"></path></svg>',
+                click: (event,item) => {
+                    deleteStickTopSession(item.id).then(res => {
+                        store.dispatch({
+                            type:TOP_SESSION_LIST,
+                            action:'remove',
+                            topSessionList: [res.stickTopSession]
+                        })
+                    }).catch(err => {
+                        console.log(err);
+                        ElNotification.error({message:'取消置顶会话失败'})
+                    })
+
+                }
+            },
+            {
+                label: "点击不关闭菜单",
+                click: () => {
+                    return false;
+                }
+            }
+        ],
+    });
+    function handleTopSessionClick(event,item) {
+        menusEvent(event, menus.value,item);
         event.preventDefault();
     }
-    const topSessionMenus = shallowRef([
-        {
-            label: "返回(B)1",
-            tip: 'Alt+向左箭头',
-            click: () => {
-                window.history.back(-1);
-            }
-        },
-        {
-            label: "点击不关闭菜单1",
-            tip: '不关闭菜单',
-            click: () => {
-                return false;
-            }
-        }
-    ]);
-    return { topSessionMenus, topSessionIsOpen, topSessionRightClick, topSessionEventVal }
+    return { handleTopSessionClick }
 }
 
 
@@ -413,27 +418,27 @@ export default {
         // 置顶栏右键菜单栏
         topItemsMenu(item, event) {
             // https://github.com/xfy520/vue3-menus#方法方式使用
-            const menus = shallowRef({
-                menus: [
-                    {
-                        label: "返回(B)",
-                        tip: 'Alt+向左箭头',
-                        click: () => {
-                            window.history.back(-1);
-                        }
-                    },
-                    {
-                        label: "点击不关闭菜单",
-                        tip: '不关闭菜单',
-                        click: () => {
-                            return false;
-                        }
-                    }
-                ],
-                direction:'left',
-            });
-            menusEvent(event, menus.value,{});
-            event.preventDefault();
+            // const menus = shallowRef({
+            //     menus: [
+            //         {
+            //             label: "返回(B)",
+            //             tip: 'Alt+向左箭头',
+            //             click: () => {
+            //                 window.history.back(-1);
+            //             }
+            //         },
+            //         {
+            //             label: "点击不关闭菜单",
+            //             tip: '不关闭菜单',
+            //             click: () => {
+            //                 return false;
+            //             }
+            //         }
+            //     ],
+            //     direction:'left',
+            // });
+            // menusEvent(event, menus.value,{});
+            // event.preventDefault();
 
             // this.$contextmenu({
             //     items: [
@@ -613,13 +618,8 @@ export default {
                     :key="item.id"
                     class="top-item"
                     @click.stop="clickTab(item.index_name)"
-                    @contextmenu.prevent.stop="topSessionRightClick"
+                    @contextmenu.prevent="handleTopSessionClick($event,item)"
                 >
-                    <vue3-menus v-model:open="topSessionIsOpen" :event="topSessionEventVal" :menus="topSessionMenus">
-                        <template #icon="{menu, activeIndex, index}">{{activeIndex}}1</template>
-                        <template #label="{ menu, activeIndex, index}">插槽：{{ menu.label }}</template>
-                    </vue3-menus>
-
                     <el-tooltip
                         effect="dark"
                         placement="top-start"
@@ -1097,13 +1097,22 @@ export default {
 //    }
 //}
 
-.v3-menus{
-    .v3-menus-body{
-        .v3-menus-item{
-            font-size: 14px;
-            background-color: red;
-        }
-    }
+//todo 改为全局css
+:global(.v3-menus .v3-menus-body .v3-menus-item){
+    line-height: .14rem;
+    font-size: .14rem;
+    padding: .08rem .1rem;
+}
+
+:global(.v3-menus .v3-menus-body .v3-menus-item .v3-menus-icon){
+    width: .14rem;
+    margin-right: .05rem;
+
+}
+:global(.v3-menus .v3-menus-body .v3-menus-item .v3-menus-icon svg){
+    display: flex;
+    align-items: center;
+    width: .14rem;
 }
 
 </style>

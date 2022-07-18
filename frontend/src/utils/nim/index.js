@@ -225,6 +225,7 @@ export const getHistoryMsgs = async () => {
     });
 };
 
+/**************************************************** 会话相关 **************************************************************************************************/
 // 获取置顶会话列表 http://dev.yunxin.163.com/docs/interface/%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AFWeb%E7%AB%AF/NIMSDK-Web/NIM.html#getStickTopSessions__anchor
 export const getStickTopSessions = async (isShowDelete = false) => {
     const nim = await getNimInstance();
@@ -248,6 +249,22 @@ export const addStickTopSession = async id => {
         nim.addStickTopSession({
             id: id,
             topCustom: '',
+            done: (error, obj) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(obj);
+            }
+        });
+    });
+};
+
+// 删除置顶会话 http://dev.yunxin.163.com/docs/interface/%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AFWeb%E7%AB%AF/NIMSDK-Web/NIM.html#deleteStickTopSession__anchor
+export const deleteStickTopSession = async id => {
+    const nim = await getNimInstance();
+    return new Promise((resolve, reject) => {
+        nim.deleteStickTopSession({
+            id: id,
             done: (error, obj) => {
                 if (error) {
                     return reject(error);

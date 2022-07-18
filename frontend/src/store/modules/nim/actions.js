@@ -1,5 +1,5 @@
 import * as c from './constants';
-import loadsh from 'loadsh';
+import lodash from 'lodash';
 
 // 合并数组并去重
 function concatAndUniqArr(arr1 = [], arr2 = []) {
@@ -12,7 +12,23 @@ function concatAndUniqArr(arr1 = [], arr2 = []) {
     if (arr1.length > 0 && arr2.length === 0) {
         return arr1;
     }
-    return loadsh.uniqBy(loadsh.concat(arr1, arr2), 'id');
+    return lodash.uniqBy(lodash.concat(arr1, arr2), 'id');
+}
+// 去除数组对应元素
+function removeArr(arr = [], remove = []) {
+    if (arr.length === 0) {
+        return [];
+    }
+    if (remove.length === 0) {
+        return arr;
+    }
+    const removeArrId = [];
+    remove.forEach(val => {
+        removeArrId.push(val.id);
+    });
+    return lodash.dropRightWhile(arr, val => {
+        return removeArrId.includes(val.id);
+    });
 }
 
 export const actions = {
@@ -49,10 +65,23 @@ export const actions = {
     },
     // 置顶会话列表
     [c.TOP_SESSION_LIST]({ state, commit }, payload) {
-        payload.topSessionList = concatAndUniqArr(
-            payload.topSessionList,
-            toRaw(state.topSessionList)
-        );
+        const remove = () => {
+            payload.topSessionList = removeArr(toRaw(state.topSessionList), payload.topSessionList);
+        };
+        const add = () => {
+            payload.topSessionList = concatAndUniqArr(
+                payload.topSessionList,
+                toRaw(state.topSessionList)
+            );
+        };
+        switch (payload?.action) {
+            case 'remove':
+                remove();
+                break;
+            default:
+                add();
+                break;
+        }
         commit(payload);
     }
 };
