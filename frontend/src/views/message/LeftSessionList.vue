@@ -1,105 +1,136 @@
 <script setup>
-// todo 去掉
-import { CURRENT_SESSION_LIST } from "@/store/modules/nim/constants";
-
+// todo 查看双向绑定数据
 
 const store = useStore();
-const emit = defineEmits(['clickSession'])
+const emit = defineEmits(['clickSession']);
 
 // 置顶聊天
 const topSessionList = computed(() => store.state.nim.topSessionList);
-useTopListEffect()
+const { handleTopSessionClick, getTopSession } = useTopSessionListEffect();
+getTopSession();
 
-
-
-
+//会话列表
 const sessionList = computed(() => store.state.nim.sessionList);
-
-const {params,handleClickSession} = useClickSessionEffect(emit)
-
-// useSessionListEffect()
-
-
-
-const {handleTopSessionClick} = useTopSessionRightClickEffect()
-
-
+const { getSession, params, handleClickSession } = useSessionListEffect(emit);
+// getSession()
 
 //todo 去掉
 let index_name = ref('');
-
-
 </script>
 <script>
 //获取对话列表
-import { mapGetters, mapState, useStore } from "vuex";
-import { getSessionList, getTopSessionList } from '@/utils/nim/user';
-import { CURRENT_SESSION_LIST, SESSION_LIST,TOP_SESSION_LIST } from '@/store/modules/nim/constants';
-import { ElNotification } from "element-plus";
-import UTime from "@/views/message/utime.vue";
-import { findTalkIndex, getCacheIndexName } from "@/utils/talk";
-import { Plus, Search } from "@element-plus/icons-vue";
-import { beautifyTime } from "@/utils/functions";
-import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from "@/api/chat";
-import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
-import { ServeSecedeGroup } from "@/api/group";
-import { addStickTopSession, deleteStickTopSession } from '@/utils/nim';
+import { mapGetters, mapState, useStore } from 'vuex';
+import { ElNotification } from 'element-plus';
+import { Plus, Search } from '@element-plus/icons-vue';
+
 //https://github.com/xfy520/vue3-menus
 import { menusEvent } from 'vue3-menus';
-import { Vue3Menus } from 'vue3-menus';
+
+import { getSessionList, getTopSessionList } from '@/utils/nim/user';
+import {
+    CURRENT_SESSION_LIST,
+    SESSION_LIST,
+    TOP_SESSION_LIST
+} from '@/store/modules/nim/constants';
+import UTime from '@/views/message/utime.vue';
+import { findTalkIndex, getCacheIndexName } from '@/utils/talk';
+import { beautifyTime } from '@/utils/functions';
+import { ServeDeleteTalkList, ServeSetNotDisturb, ServeTopTalkList } from '@/api/chat';
+import { ServeDeleteContact, ServeEditContactRemark } from '@/api/contacts';
+import { ServeSecedeGroup } from '@/api/group';
+import { addStickTopSession, deleteStickTopSession } from '@/utils/nim';
 
 //置顶列表
-const useTopListEffect = () => {
-    const store = useStore()
-    addStickTopSession('team-5555897456')
-    addStickTopSession('p2p-azhuang1')
-    getTopSessionList().then(res => {
-        store.dispatch({
-            type:TOP_SESSION_LIST,
-            topSessionList: res
-        })
-    }).catch(err => {
-        ElNotification.error({
-            message: '获取置顶列表失败'
-        });
-    });
-}
-
-//获取左侧会话列表
-const useSessionListEffect = () => {
+const useTopSessionListEffect = () => {
     const store = useStore();
-    getSessionList()
-        .then(res => {
-            store.dispatch({
-                type: SESSION_LIST,
-                session: res
+    // addStickTopSession('team-5555897456');
+    // addStickTopSession('p2p-azhuang1');
+    //获取列表
+    const getTopSession = () => {
+        getTopSessionList()
+            .then(res => {
+                store.dispatch({
+                    type: TOP_SESSION_LIST,
+                    topSessionList: res
+                });
+            })
+            .catch(err => {
+                ElNotification.error({
+                    message: '获取置顶列表失败'
+                });
             });
-        })
-        .catch(err => {
-            ElNotification({
-                type: 'error',
-                message: '获取对话列表失败'
-            });
-        });
+    };
+    //置顶列表右击
+    const menus = shallowRef({
+        menus: [
+            {
+                label: '取消置顶',
+                icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8=""><path fill="currentColor" d="M544 805.888V168a32 32 0 1 0-64 0v637.888L246.656 557.952a30.72 30.72 0 0 0-45.312 0 35.52 35.52 0 0 0 0 48.064l288 306.048a30.72 30.72 0 0 0 45.312 0l288-306.048a35.52 35.52 0 0 0 0-48 30.72 30.72 0 0 0-45.312 0L544 805.824z"></path></svg>',
+                click: (event, item) => {
+                    deleteStickTopSession(item.id)
+                        .then(res => {
+                            store.dispatch({
+                                type: TOP_SESSION_LIST,
+                                action: 'remove',
+                                topSessionList: [res.stickTopSession]
+                            });
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            ElNotification.error({ message: '取消置顶会话失败' });
+                        });
+                }
+            },
+            {
+                label: '点击不关闭菜单',
+                click: () => {
+                    return false;
+                }
+            }
+        ]
+    });
+    const handleTopSessionClick = (event, item) => {
+        menusEvent(event, menus.value, item);
+        event.preventDefault();
+    };
+    return {
+        getTopSession,
+        handleTopSessionClick
+    };
 };
 
-// 点击回话列表，渲染会话
-const useClickSessionEffect = (emit) => {
+//获取左侧会话列表
+const useSessionListEffect = emit => {
     const store = useStore();
-
+    //获取列表
+    const getSession = () => {
+        getSessionList()
+            .then(res => {
+                store.dispatch({
+                    type: SESSION_LIST,
+                    session: res
+                });
+            })
+            .catch(err => {
+                ElNotification({
+                    type: 'error',
+                    message: '获取对话列表失败'
+                });
+            });
+    };
     // 对话面板的传递参数
     const params = reactive({
         session_type: '',
-        session_name:'',
+        session_name: '',
         receiver_id: 0,
 
         talk_type: 1,
         nickname: '',
-        is_robot: 0,
-    })
+        is_robot: 0
+    });
     //切换聊天栏目 子组件向父级传值
-    const handleClickSession = (sessionInfo) => {
-        const {id,name,session_type} = sessionInfo
+    const handleClickSession = sessionInfo => {
+        const { id, name, session_type } = sessionInfo;
         const index = findTalkIndex(name);
 
         if (index == -1) {
@@ -115,13 +146,13 @@ const useClickSessionEffect = (emit) => {
 
         // todo 不能使用 toRaw(params) ?bug
         store.dispatch({
-            type:CURRENT_SESSION_LIST,
+            type: CURRENT_SESSION_LIST,
             currentSession: {
                 talk_type: 1,
                 receiver_id: id,
                 is_robot: 0
             }
-        })
+        });
 
         store.commit('UPDATE_DIALOGUE_MESSAGE', {
             talk_type: 1,
@@ -129,61 +160,22 @@ const useClickSessionEffect = (emit) => {
             is_robot: 0
         });
         // 触发上级,函数
-        emit('clickSession', params)
-    }
+        emit('clickSession', params);
+    };
 
     return {
-        params,handleClickSession
-    }
-}
-
-//置顶列表右击
-const useTopSessionRightClickEffect = () => {
-    const store = useStore()
-    const menus = shallowRef({
-        menus: [
-            {
-                label: "取消置顶",
-                icon:'<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8=""><path fill="currentColor" d="M544 805.888V168a32 32 0 1 0-64 0v637.888L246.656 557.952a30.72 30.72 0 0 0-45.312 0 35.52 35.52 0 0 0 0 48.064l288 306.048a30.72 30.72 0 0 0 45.312 0l288-306.048a35.52 35.52 0 0 0 0-48 30.72 30.72 0 0 0-45.312 0L544 805.824z"></path></svg>',
-                click: (event,item) => {
-                    deleteStickTopSession(item.id).then(res => {
-                        store.dispatch({
-                            type:TOP_SESSION_LIST,
-                            action:'remove',
-                            topSessionList: [res.stickTopSession]
-                        })
-                    }).catch(err => {
-                        console.log(err);
-                        ElNotification.error({message:'取消置顶会话失败'})
-                    })
-
-                }
-            },
-            {
-                label: "点击不关闭菜单",
-                click: () => {
-                    return false;
-                }
-            }
-        ],
-    });
-    function handleTopSessionClick(event,item) {
-        menusEvent(event, menus.value,item);
-        event.preventDefault();
-    }
-    return { handleTopSessionClick }
-}
-
-
-
+        getSession,
+        params,
+        handleClickSession
+    };
+};
 
 const title = document.title;
 
 export default {
     name: 'LeftSessionList',
     components: {
-        UTime,
-        Vue3Menus
+        UTime
     },
 
     beforeRouteUpdate(to, from, next) {
@@ -201,8 +193,6 @@ export default {
             Search: markRaw(Search),
             subHeaderShadow: false,
             launchGroupShow: false,
-
-
 
             // 查询关键词
             input: '',
@@ -318,8 +308,6 @@ export default {
             sessionStorage.setItem('send_message_index_name', `2_${data.group_id}`);
             this.$store.dispatch('LOAD_TALK_ITEMS');
         },
-
-
 
         // 修改当前对话
         changeTalk(index_name) {
@@ -606,40 +594,41 @@ export default {
             </div>
         </el-header>
 
-        <el-main class='no-padding'>
+        <el-main class="no-padding">
             <!-- 置顶栏 -->
-            <header
-                v-show="topSessionList.length !== 0"
-                class="subheader"
-            >
+            <header v-show="topSessionList.length !== 0" class="subheader">
                 <span class="subheader-title">置顶聊天</span>
                 <div
                     v-for="item in topSessionList"
                     :key="item.id"
                     class="top-item"
                     @click.stop="clickTab(item.index_name)"
-                    @contextmenu.prevent="handleTopSessionClick($event,item)"
+                    @contextmenu.prevent="handleTopSessionClick($event, item)"
                 >
                     <el-tooltip
                         effect="dark"
                         placement="top-start"
-                        :content="item.sessionInfo.nick ? item.sessionInfo.nick : item.sessionInfo.name"
+                        :content="
+                            item.sessionInfo.nick ? item.sessionInfo.nick : item.sessionInfo.name
+                        "
                     >
                         <div class="avatar">
                             <span v-show="!item.sessionInfo.avatar">
-                              {{(item.sessionInfo.nick ? item.sessionInfo.nick : item.sessionInfo.name).substr(0, 1) }}
+                                {{
+                                    (item.sessionInfo.nick
+                                        ? item.sessionInfo.nick
+                                        : item.sessionInfo.name
+                                    ).substr(0, 1)
+                                }}
                             </span>
                             <img
                                 v-show="item.sessionInfo.avatar"
-                                v-lazyImg="{src:item.sessionInfo.avatar}"
+                                v-lazyImg="{ src: item.sessionInfo.avatar }"
                             />
                         </div>
                     </el-tooltip>
 
-                    <div
-                        class="name"
-                        :class="{ active: params.nickname == item.index_name }"
-                    >
+                    <div class="name" :class="{ active: params.nickname == item.index_name }">
                         {{ item.name }}
                     </div>
                 </div>
@@ -674,9 +663,9 @@ export default {
                             @contextmenu.prevent="talkItemsMenu(item, $event)"
                         >
                             <div class="avatar-box">
-                            <span v-show="!item.avatar">
-                                {{ (item.sessionInfo.name).substr(0, 1) }}
-                            </span>
+                                <span v-show="!item.avatar">
+                                    {{ item.sessionInfo.name.substr(0, 1) }}
+                                </span>
                                 <img
                                     v-show="item.sessionInfo.avatar"
                                     :src="item.sessionInfo.avatar"
@@ -703,7 +692,10 @@ export default {
 
                                         <div v-show="item.is_robot" class="larkc-tag top">BOT</div>
 
-                                        <div v-show="item.session_type == 'team'" class="larkc-tag group">
+                                        <div
+                                            v-show="item.session_type == 'team'"
+                                            class="larkc-tag group"
+                                        >
                                             群组
                                         </div>
                                         <div v-show="item.is_disturb" class="larkc-tag disturb">
@@ -711,24 +703,28 @@ export default {
                                         </div>
                                     </div>
                                     <div class="card-time">
-                                        <u-time :value="String(Math.ceil(item.updateTime / 1000))" />
+                                        <u-time
+                                            :value="String(Math.ceil(item.updateTime / 1000))"
+                                        />
                                     </div>
                                 </div>
                                 <div class="content">
-                                    <template v-if="index_name != item.index_name && item.draft_text">
+                                    <template
+                                        v-if="index_name != item.index_name && item.draft_text"
+                                    >
                                         <span class="draft-color">[草稿]</span>
                                         <span>{{ item.draft_text }}</span>
                                     </template>
                                     <template v-else>
                                         <template v-if="item.is_robot == 0">
-                                        <span
-                                            v-if="item.talk_type == 1"
-                                            :class="{
-                                                'online-color': item.is_online == 1
-                                            }"
-                                        >
-                                            [{{ item.is_online == 1 ? '在线' : '离线' }}]
-                                        </span>
+                                            <span
+                                                v-if="item.talk_type == 1"
+                                                :class="{
+                                                    'online-color': item.is_online == 1
+                                                }"
+                                            >
+                                                [{{ item.is_online == 1 ? '在线' : '离线' }}]
+                                            </span>
                                             <span v-else>[群消息]</span>
                                         </template>
 
@@ -744,7 +740,6 @@ export default {
     </el-container>
 </template>
 
-
 <style lang="scss" scoped>
 :deep(.el-scrollbar__wrap) {
     overflow-x: hidden;
@@ -753,8 +748,8 @@ export default {
 .splitpanes.default-theme .splitpanes__pane {
     background-color: white;
 }
-.el-scrollbar__view{
-    .session-title{
+.el-scrollbar__view {
+    .session-title {
         width: 100%;
         padding: 5px 10px;
         margin: 8px 0 0;
@@ -783,10 +778,9 @@ export default {
                 font-size: 12px;
                 padding: 1px 0;
             }
-            :deep(.el-input__prefix){
-                padding-left: 8px ;
+            :deep(.el-input__prefix) {
+                padding-left: 8px;
                 font-size: 20px;
-
             }
         }
 
@@ -836,10 +830,10 @@ export default {
         background: aliceblue;
         //todo 间距不对齐
         &::after {
-            content: "";
+            content: '';
             flex: auto;
         }
-        &-title{
+        &-title {
             width: 100%;
             padding: 5px 5px;
             margin-bottom: 10px;
@@ -1098,21 +1092,19 @@ export default {
 //}
 
 //todo 改为全局css
-:global(.v3-menus .v3-menus-body .v3-menus-item){
-    line-height: .14rem;
-    font-size: .14rem;
-    padding: .08rem .1rem;
+:global(.v3-menus .v3-menus-body .v3-menus-item) {
+    line-height: 0.14rem;
+    font-size: 0.14rem;
+    padding: 0.08rem 0.1rem;
 }
 
-:global(.v3-menus .v3-menus-body .v3-menus-item .v3-menus-icon){
-    width: .14rem;
-    margin-right: .05rem;
-
+:global(.v3-menus .v3-menus-body .v3-menus-item .v3-menus-icon) {
+    width: 0.14rem;
+    margin-right: 0.05rem;
 }
-:global(.v3-menus .v3-menus-body .v3-menus-item .v3-menus-icon svg){
+:global(.v3-menus .v3-menus-body .v3-menus-item .v3-menus-icon svg) {
     display: flex;
     align-items: center;
-    width: .14rem;
+    width: 0.14rem;
 }
-
 </style>
