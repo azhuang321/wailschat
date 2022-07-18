@@ -21,9 +21,7 @@ const {params,handleClickSession} = useClickSessionEffect(emit)
 
 
 
-const test = (event, item) =>{
-
-}
+const {topSessionMenus, topSessionIsOpen, topSessionRightClick, topSessionEventVal} = useTopSessionRightClickEffect()
 
 
 
@@ -48,6 +46,7 @@ import { ServeSecedeGroup } from "@/api/group";
 import { addStickTopSession } from "@/utils/nim";
 //https://github.com/xfy520/vue3-menus
 import { menusEvent } from 'vue3-menus';
+import { Vue3Menus } from 'vue3-menus';
 
 //置顶列表
 const useTopListEffect = () => {
@@ -139,6 +138,37 @@ const useClickSessionEffect = (emit) => {
 }
 
 
+const useTopSessionRightClickEffect = () => {
+    const topSessionIsOpen = ref(false);
+    const topSessionEventVal = ref({});
+    function topSessionRightClick(event) {
+        console.log('click')
+        topSessionIsOpen.value = false;
+        nextTick(() => {
+            topSessionEventVal.value = event;
+            topSessionIsOpen.value = true;
+        })
+        event.preventDefault();
+    }
+    const topSessionMenus = shallowRef([
+        {
+            label: "返回(B)1",
+            tip: 'Alt+向左箭头',
+            click: () => {
+                window.history.back(-1);
+            }
+        },
+        {
+            label: "点击不关闭菜单1",
+            tip: '不关闭菜单',
+            click: () => {
+                return false;
+            }
+        }
+    ]);
+    return { topSessionMenus, topSessionIsOpen, topSessionRightClick, topSessionEventVal }
+}
+
 
 
 
@@ -147,7 +177,8 @@ const title = document.title;
 export default {
     name: 'LeftSessionList',
     components: {
-        UTime
+        UTime,
+        Vue3Menus
     },
 
     beforeRouteUpdate(to, from, next) {
@@ -398,11 +429,12 @@ export default {
                             return false;
                         }
                     }
-                ]
+                ],
+                direction:'left',
             });
-            console.log('right')
-            menusEvent(event, menus.value);
+            menusEvent(event, menus.value,{});
             event.preventDefault();
+
             // this.$contextmenu({
             //     items: [
             //         {
@@ -581,8 +613,13 @@ export default {
                     :key="item.id"
                     class="top-item"
                     @click.stop="clickTab(item.index_name)"
-                    @contextmenu.prevent="topItemsMenu(item, $event)"
+                    @contextmenu.prevent.stop="topSessionRightClick"
                 >
+                    <vue3-menus v-model:open="topSessionIsOpen" :event="topSessionEventVal" :menus="topSessionMenus">
+                        <template #icon="{menu, activeIndex, index}">{{activeIndex}}1</template>
+                        <template #label="{ menu, activeIndex, index}">插槽：{{ menu.label }}</template>
+                    </vue3-menus>
+
                     <el-tooltip
                         effect="dark"
                         placement="top-start"
@@ -1059,4 +1096,14 @@ export default {
 //        }
 //    }
 //}
+
+.v3-menus{
+    .v3-menus-body{
+        .v3-menus-item{
+            font-size: 14px;
+            background-color: red;
+        }
+    }
+}
+
 </style>
