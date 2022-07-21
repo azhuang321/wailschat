@@ -62,11 +62,11 @@ async function dealSessionList(sessionList = []) {
     const teamIds = [];
     sessionList.map((val, index) => {
         if (val.id.startsWith('team-')) {
-            val.session_type = 'team';
+            val.sessionType = 'team';
             teamIds.push(val.id.split('team-')[1]);
         }
         if (val.id.startsWith('p2p-')) {
-            val.session_type = 'p2p';
+            val.sessionType = 'p2p';
             for (let i = 0; i < friendList.length; i++) {
                 if (friendList[i].account === val.id.split('p2p-')[1]) {
                     friendList[i].name = friendList[i].alias
@@ -81,7 +81,7 @@ async function dealSessionList(sessionList = []) {
     });
     const teams = await getUserTeams(teamIds, false);
     sessionList.map((val, index) => {
-        if (val.session_type === 'team') {
+        if (val.sessionType === 'team') {
             for (let i = 0; i < teams.length; i++) {
                 if (teams[i].teamId === val.id.split('team-')[1]) {
                     sessionList[index].sessionInfo = teams[i];

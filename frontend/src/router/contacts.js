@@ -10,7 +10,6 @@ export default {
                 title: '我的联系人',
                 needLogin: true,
                 keepAlive: true
-
             },
             component: () => import('@/views/contacts/apply.vue')
         },
@@ -29,7 +28,6 @@ export default {
                 title: '我的群组',
                 needLogin: true,
                 keepAlive: true
-
             },
             component: () => import('@/views/contacts/groups.vue')
         }

@@ -2,7 +2,7 @@ module wailschat
 
 go 1.17
 
-require github.com/wailsapp/wails/v2 v2.0.0-beta.38
+require github.com/wailsapp/wails/v2 v2.0.0-beta.39
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect

@@ -88,7 +88,15 @@ const useLeftSessionListEffect = () => {
 //对话面板参数
 const useSessionPanelEffect = () => {
     // 对话面板的传递参数
-    let params = reactive({})
+    let params = reactive({
+        session_type: '',
+        session_name: '',
+        receiver_id: 0,
+
+        talk_type: 1,
+        nickname: '',
+        is_robot: 0
+    })
     const handClickSession = (childParams) => {
         params = Object.assign(params,childParams)
     }

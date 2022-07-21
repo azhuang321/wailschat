@@ -6,16 +6,18 @@ const emit = defineEmits(['clickSession']);
 
 // 置顶聊天
 const topSessionList = computed(() => store.state.nim.topSessionList);
-const { handleTopSessionClick, getTopSession } = useTopSessionListEffect();
+const { handleTopSessionRightClick, getTopSession } = useTopSessionListEffect();
 getTopSession();
 
 //会话列表
 const sessionList = computed(() => store.state.nim.sessionList);
-const { getSession, params, handleClickSession } = useSessionListEffect(emit);
-// getSession()
+const { sessionId, getSession, handleClickSession, handleSessionRightClick } =
+    useSessionListEffect(emit);
+getSession();
 
 //todo 去掉
 let index_name = ref('');
+let params = ref({});
 </script>
 <script>
 //获取对话列表
@@ -89,19 +91,20 @@ const useTopSessionListEffect = () => {
             }
         ]
     });
-    const handleTopSessionClick = (event, item) => {
+    const handleTopSessionRightClick = (event, item) => {
         menusEvent(event, menus.value, item);
         event.preventDefault();
     };
     return {
         getTopSession,
-        handleTopSessionClick
+        handleTopSessionRightClick
     };
 };
 
 //获取左侧会话列表
 const useSessionListEffect = emit => {
     const store = useStore();
+    const sessionId = ref('');
     //获取列表
     const getSession = () => {
         getSessionList()
@@ -118,55 +121,133 @@ const useSessionListEffect = emit => {
                 });
             });
     };
-    // 对话面板的传递参数
-    const params = reactive({
-        session_type: '',
-        session_name: '',
-        receiver_id: 0,
 
-        talk_type: 1,
-        nickname: '',
-        is_robot: 0
-    });
     //切换聊天栏目 子组件向父级传值
     const handleClickSession = sessionInfo => {
-        const { id, name, session_type } = sessionInfo;
-        const index = findTalkIndex(name);
+        const { id, name, sessionType } = sessionInfo;
+        sessionId.value = id;
 
-        if (index == -1) {
-            //todo 判断
-        }
-
-        params.session_type = session_type;
-        params.receiver_id = id;
-        params.session_name = name;
-
-        // params.talk_type = 1; 1:好友 2:群组
-        // params.nickname = name;
-
-        // todo 不能使用 toRaw(params) ?bug
-        store.dispatch({
-            type: CURRENT_SESSION_LIST,
-            currentSession: {
-                talk_type: 1,
-                receiver_id: id,
-                is_robot: 0
-            }
-        });
+        // todo 多个聊天
+        // store.dispatch({
+        //     type: CURRENT_SESSION_LIST,
+        //     currentSession: {
+        //         talk_type: 1,
+        //         receiver_id: id,
+        //         is_robot: 0
+        //     }
+        // });
 
         store.commit('UPDATE_DIALOGUE_MESSAGE', {
             talk_type: 1,
             receiver_id: id,
             is_robot: 0
         });
-        // 触发上级,函数
-        emit('clickSession', params);
+        // 触发上级,函数 对话面板的传递参数
+        emit('clickSession', {
+            sessionType: sessionType,
+            receiverId: id,
+            sessionName: name
+        });
+    };
+
+    //右键
+    //置顶列表右击
+    const menus = shallowRef({
+        menus: [
+            {
+                label: '置顶聊天',
+                icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8=""><path fill="currentColor" d="M572.235 205.282v600.365a30.118 30.118 0 1 1-60.235 0V205.282L292.382 438.633a28.913 28.913 0 0 1-42.646 0 33.43 33.43 0 0 1 0-45.236l271.058-288.045a28.913 28.913 0 0 1 42.647 0L834.5 393.397a33.43 33.43 0 0 1 0 45.176 28.913 28.913 0 0 1-42.647 0l-219.618-233.23z"></path></svg>',
+                click: (event, item) => {
+                    addStickTopSession(item.id)
+                        .then(res => {
+                            store.dispatch({
+                                type: TOP_SESSION_LIST,
+                                action: 'add',
+                                topSessionList: [res.stickTopSession]
+                            });
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            ElNotification.error({ message: '置顶聊天失败' });
+                        });
+                }
+            }
+            // {
+            //     label: '好友信息',
+            //     icon: 'el-icon-user',
+            //     disabled: item.talk_type == 2 || item.is_robot == 1,
+            //     onClick: () => {
+            //         this.$user(item.receiver_id);
+            //     }
+            // },
+            // {
+            //     label: '修改备注',
+            //     icon: 'el-icon-edit-outline',
+            //     disabled: item.talk_type == 2 || item.is_robot == 1,
+            //     onClick: () => {
+            //         this.editFriendRemarks(item);
+            //     }
+            // },
+            // {
+            //     label: item.is_top == 0 ? '会话置顶' : '取消置顶',
+            //     icon: 'el-icon-top',
+            //     onClick: () => {
+            //         this.topChatItem(item);
+            //     }
+            // },
+            // {
+            //     label: item.is_disturb == 0 ? '消息免打扰' : '开启消息提示',
+            //     icon: item.is_disturb == 0 ? 'el-icon-close-notification' : 'el-icon-bell',
+            //     disabled: item.is_robot == 1,
+            //     onClick: () => {
+            //         this.setNotDisturb(item);
+            //     }
+            // },
+            // {
+            //     label: '移除会话',
+            //     icon: 'el-icon-remove-outline',
+            //     divided: true,
+            //     onClick: () => {
+            //         this.delChatItem(item);
+            //     }
+            // },
+            // {
+            //     label: item.talk_type == 1 ? '删除好友' : '退出群聊',
+            //     icon: 'el-icon-delete',
+            //     disabled: item.is_robot == 1,
+            //     onClick: () => {
+            //         const title = item.talk_type == 1 ? '删除好友' : '退出群聊';
+            //         this.$confirm(
+            //             `此操作将 <span style="color:red;font-size:16px;">${title}</span>, 是否继续?`,
+            //             '提示',
+            //             {
+            //                 confirmButtonText: '确定',
+            //                 cancelButtonText: '取消',
+            //                 type: 'warning',
+            //                 center: true,
+            //                 dangerouslyUseHTMLString: true
+            //             }
+            //         ).then(() => {
+            //             if (item.talk_type == 1) {
+            //                 this.removeFriend(item);
+            //             } else {
+            //                 this.removeGroup(item);
+            //             }
+            //         });
+            //     }
+            // }
+        ]
+    });
+    const handleSessionRightClick = (event, item) => {
+        menusEvent(event, menus.value, item);
+        event.preventDefault();
     };
 
     return {
+        sessionId,
         getSession,
-        params,
-        handleClickSession
+        handleClickSession,
+        handleSessionRightClick
     };
 };
 
@@ -325,126 +406,6 @@ export default {
 
             this.$store.dispatch('LOAD_TALK_ITEMS');
         },
-
-        // 对话列表的右键自定义菜单
-        talkItemsMenu(item, event) {
-            const items = {
-                items: [
-                    {
-                        label: '好友信息',
-                        icon: 'el-icon-user',
-                        disabled: item.talk_type == 2 || item.is_robot == 1,
-                        onClick: () => {
-                            this.$user(item.receiver_id);
-                        }
-                    },
-                    {
-                        label: '修改备注',
-                        icon: 'el-icon-edit-outline',
-                        disabled: item.talk_type == 2 || item.is_robot == 1,
-                        onClick: () => {
-                            this.editFriendRemarks(item);
-                        }
-                    },
-                    {
-                        label: item.is_top == 0 ? '会话置顶' : '取消置顶',
-                        icon: 'el-icon-top',
-                        onClick: () => {
-                            this.topChatItem(item);
-                        }
-                    },
-                    {
-                        label: item.is_disturb == 0 ? '消息免打扰' : '开启消息提示',
-                        icon: item.is_disturb == 0 ? 'el-icon-close-notification' : 'el-icon-bell',
-                        disabled: item.is_robot == 1,
-                        onClick: () => {
-                            this.setNotDisturb(item);
-                        }
-                    },
-                    {
-                        label: '移除会话',
-                        icon: 'el-icon-remove-outline',
-                        divided: true,
-                        onClick: () => {
-                            this.delChatItem(item);
-                        }
-                    },
-                    {
-                        label: item.talk_type == 1 ? '删除好友' : '退出群聊',
-                        icon: 'el-icon-delete',
-                        disabled: item.is_robot == 1,
-                        onClick: () => {
-                            const title = item.talk_type == 1 ? '删除好友' : '退出群聊';
-                            this.$confirm(
-                                `此操作将 <span style="color:red;font-size:16px;">${title}</span>, 是否继续?`,
-                                '提示',
-                                {
-                                    confirmButtonText: '确定',
-                                    cancelButtonText: '取消',
-                                    type: 'warning',
-                                    center: true,
-                                    dangerouslyUseHTMLString: true
-                                }
-                            ).then(() => {
-                                if (item.talk_type == 1) {
-                                    this.removeFriend(item);
-                                } else {
-                                    this.removeGroup(item);
-                                }
-                            });
-                        }
-                    }
-                ],
-                event: event,
-                zIndex: 3
-            };
-
-            this.$contextmenu(items);
-            return false;
-        },
-
-        // 置顶栏右键菜单栏
-        topItemsMenu(item, event) {
-            // https://github.com/xfy520/vue3-menus#方法方式使用
-            // const menus = shallowRef({
-            //     menus: [
-            //         {
-            //             label: "返回(B)",
-            //             tip: 'Alt+向左箭头',
-            //             click: () => {
-            //                 window.history.back(-1);
-            //             }
-            //         },
-            //         {
-            //             label: "点击不关闭菜单",
-            //             tip: '不关闭菜单',
-            //             click: () => {
-            //                 return false;
-            //             }
-            //         }
-            //     ],
-            //     direction:'left',
-            // });
-            // menusEvent(event, menus.value,{});
-            // event.preventDefault();
-
-            // this.$contextmenu({
-            //     items: [
-            //         {
-            //             label: item.is_top == 0 ? '会话置顶' : '取消置顶',
-            //             icon: 'el-icon-top',
-            //             onClick: () => {
-            //                 this.topChatItem(item);
-            //             }
-            //         }
-            //     ],
-            //     event: event,
-            //     zIndex: 3
-            // });
-
-            return false;
-        },
-
         // 会话列表置顶
         topChatItem(item) {
             ServeTopTalkList({
@@ -603,23 +564,16 @@ export default {
                     :key="item.id"
                     class="top-item"
                     @click.stop="clickTab(item.index_name)"
-                    @contextmenu.prevent="handleTopSessionClick($event, item)"
+                    @contextmenu.prevent="handleTopSessionRightClick($event, item)"
                 >
                     <el-tooltip
                         effect="dark"
                         placement="top-start"
-                        :content="
-                            item.sessionInfo.nick ? item.sessionInfo.nick : item.sessionInfo.name
-                        "
+                        :content="item.sessionInfo.name"
                     >
                         <div class="avatar">
                             <span v-show="!item.sessionInfo.avatar">
-                                {{
-                                    (item.sessionInfo.nick
-                                        ? item.sessionInfo.nick
-                                        : item.sessionInfo.name
-                                    ).substr(0, 1)
-                                }}
+                                {{ item.sessionInfo.name.substr(0, 1) }}
                             </span>
                             <img
                                 v-show="item.sessionInfo.avatar"
@@ -636,7 +590,7 @@ export default {
 
             <!-- 对话列表栏 -->
             <el-scrollbar ref="menusScrollbar" tag="section" class="full-height" :native="false">
-                <span class="session-title">会话列表</span>
+                <span class="session-title">会话列表({{ sessionList.length }})</span>
                 <el-main class="main">
                     <p v-show="loadStatus == 2" class="empty-data">
                         <i class="el-icon-loading"></i> 数据加载中...
@@ -658,18 +612,17 @@ export default {
                             v-for="item in sessionList"
                             :key="item.id"
                             class="talk-item pointer"
-                            :class="{ active: index_name === item.account }"
+                            :class="{ active: sessionId === item.id }"
                             @click="handleClickSession(item)"
-                            @contextmenu.prevent="talkItemsMenu(item, $event)"
+                            @contextmenu.prevent="handleSessionRightClick($event, item)"
                         >
                             <div class="avatar-box">
-                                <span v-show="!item.avatar">
+                                <span v-show="!item.sessionInfo.avatar">
                                     {{ item.sessionInfo.name.substr(0, 1) }}
                                 </span>
                                 <img
                                     v-show="item.sessionInfo.avatar"
-                                    :src="item.sessionInfo.avatar"
-                                    :onerror="$store.state.detaultAvatar"
+                                    v-lazyImg="{ src: item.sessionInfo.avatar }"
                                 />
                                 <div
                                     v-show="item.is_top == 0"
@@ -683,7 +636,7 @@ export default {
                                 <div class="title">
                                     <div class="card-name">
                                         <p class="nickname">
-                                            {{ item.name ? item.name : item.nick }}
+                                            {{ item.sessionInfo.name }}
                                         </p>
                                         <div v-show="item.unread_num" class="larkc-tag">
                                             {{ item.unread_num }}条未读
@@ -693,7 +646,7 @@ export default {
                                         <div v-show="item.is_robot" class="larkc-tag top">BOT</div>
 
                                         <div
-                                            v-show="item.session_type == 'team'"
+                                            v-show="item.sessionType == 'team'"
                                             class="larkc-tag group"
                                         >
                                             群组
