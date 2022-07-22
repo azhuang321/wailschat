@@ -505,7 +505,7 @@ export default {
                 <!-- 右侧聊天窗口-->
                 <pane :size="100 - leftAsideMaxWidth">
                     <!-- 聊天面板容器 -->
-                    <el-main class="ov-hidden full-height no-padding">
+<!--                    <el-main class="ov-hidden full-height no-padding">
                         <WelcomeModule v-if="params?.session_name === undefined" />
                         <TalkPanel
                             v-else
@@ -515,7 +515,7 @@ export default {
                             @change-talk="changeTalk"
                             @close-talk="closeTalk"
                         />
-                    </el-main>
+                    </el-main>-->
                 </pane>
             </splitpanes>
         </el-container>

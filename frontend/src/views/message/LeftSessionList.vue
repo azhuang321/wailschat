@@ -74,11 +74,10 @@ const useTopSessionListEffect = () => {
                             store.dispatch({
                                 type: TOP_SESSION_LIST,
                                 action: 'remove',
-                                topSessionList: [res.stickTopSession]
+                                topSessionList: [toRaw(item)]
                             });
                         })
                         .catch(err => {
-                            console.log(err);
                             ElNotification.error({ message: '取消置顶会话失败' });
                         });
                 }
@@ -163,7 +162,7 @@ const useSessionListEffect = emit => {
                             store.dispatch({
                                 type: TOP_SESSION_LIST,
                                 action: 'add',
-                                topSessionList: [res.stickTopSession]
+                                topSessionList: [item]
                             });
                         })
                         .catch(err => {
@@ -569,7 +568,7 @@ export default {
                     <el-tooltip
                         effect="dark"
                         placement="top-start"
-                        :content="item.sessionInfo.name"
+                        :content="item?.sessionInfo?.name"
                     >
                         <div class="avatar">
                             <span v-show="!item.sessionInfo.avatar">
@@ -583,7 +582,7 @@ export default {
                     </el-tooltip>
 
                     <div class="name" :class="{ active: params.nickname == item.index_name }">
-                        {{ item.name }}
+                        {{ item?.sessionInfo?.name }}
                     </div>
                 </div>
             </header>
@@ -636,7 +635,7 @@ export default {
                                 <div class="title">
                                     <div class="card-name">
                                         <p class="nickname">
-                                            {{ item.sessionInfo.name }}
+                                            {{ item?.sessionInfo?.name }}
                                         </p>
                                         <div v-show="item.unread_num" class="larkc-tag">
                                             {{ item.unread_num }}条未读
